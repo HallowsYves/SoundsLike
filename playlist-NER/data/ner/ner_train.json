@@ -1,0 +1,122 @@
+[
+  {
+    "tokens": ["Give", "me", "sad", "songs", "like", "The", "Weeknd"],
+    "labels": ["O", "O", "B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Play", "some", "happy", "pop", "music", "like", "Dua", "Lipa"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["I", "want", "relaxing", "jazz", "by", "Miles", "Davis"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Can", "you", "play", "energetic", "rock", "like", "Foo", "Fighters"],
+    "labels": ["O", "O", "O", "B-MOOD", "B-GENRE", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Chill", "vibes", "with", "Frank", "Ocean"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Give", "me", "romantic", "R&B", "from", "SZA"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["I", "feel", "angry", ",", "play", "metal", "like", "Slipknot"],
+    "labels": ["O", "O", "B-MOOD", "O", "O", "B-GENRE", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Uplifting", "country", "tracks", "by", "Kacey", "Musgraves"],
+    "labels": ["B-MOOD", "B-GENRE", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Show", "me", "calm", "indie", "songs", "like", "Phoebe", "Bridgers"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Play", "some", "dark", "techno", "music"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "O"]
+  },
+  {
+    "tokens": ["I", "want", "nostalgic", "hip", "hop", "like", "Tupac"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "I-GENRE", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Get", "me", "melancholy", "songs", "by", "Lana", "Del", "Rey"],
+    "labels": ["O", "O", "B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Pump", "me", "up", "with", "hype", "rap", "from", "Kendrick", "Lamar"],
+    "labels": ["O", "O", "O", "O", "B-MOOD", "B-GENRE", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["I", "need", "peaceful", "instrumentals"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE"]
+  },
+  {
+    "tokens": ["Play", "lofi", "beats", "to", "study", "to"],
+    "labels": ["O", "B-GENRE", "I-GENRE", "O", "O", "O"]
+  },
+  {
+    "tokens": ["Let", "me", "hear", "some", "angsty", "punk", "music"],
+    "labels": ["O", "O", "O", "O", "B-MOOD", "B-GENRE", "O"]
+  },
+  {
+    "tokens": ["Find", "me", "emotional", "ballads", "like", "Adele"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Suggest", "joyful", "electronic", "music"],
+    "labels": ["O", "B-MOOD", "B-GENRE", "O"]
+  },
+  {
+    "tokens": ["Show", "me", "songs", "like", "Drake"],
+    "labels": ["O", "O", "O", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Play", "moody", "alternative", "tracks"],
+    "labels": ["O", "B-MOOD", "B-GENRE", "O"]
+  },
+  {
+    "tokens": ["Give", "me", "heartbreak", "songs", "from", "Olivia", "Rodrigo"],
+    "labels": ["O", "O", "B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["I", "need", "focus", "music", "with", "Hans", "Zimmer"],
+    "labels": ["O", "O", "B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Play", "some", "trippy", "psychedelic", "rock"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "I-GENRE"]
+  },
+  {
+    "tokens": ["Give", "me", "hype", "EDM", "from", "Martin", "Garrix"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Play", "groovy", "funk", "like", "Prince"],
+    "labels": ["O", "B-MOOD", "B-GENRE", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["I", "want", "sad", "trap", "songs"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "O"]
+  },
+  {
+    "tokens": ["Cheerful", "acoustic", "music", "please"],
+    "labels": ["B-MOOD", "B-GENRE", "O", "O"]
+  },
+  {
+    "tokens": ["Can", "you", "play", "some", "melancholic", "folk", "like", "Bon", "Iver"],
+    "labels": ["O", "O", "O", "O", "B-MOOD", "B-GENRE", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Put", "on", "some", "laid-back", "reggae", "from", "Bob", "Marley"],
+    "labels": ["O", "O", "O", "B-MOOD", "B-GENRE", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Give", "me", "dark", "synthwave", "like", "Carpenter", "Brut"],
+    "labels": ["O", "O", "B-MOOD", "B-GENRE", "O", "B-ARTIST", "I-ARTIST"]
+  }
+]
