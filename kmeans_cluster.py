@@ -4,7 +4,7 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
 try:
-    df_scaled = pd.read_csv('data/scaled_features.csv')
+    df_scaled = pd.read_csv('data/scaled_features.csv', index_col=0)
     print('found dataset')
 except FileNotFoundError:
     print("could not find dataset")

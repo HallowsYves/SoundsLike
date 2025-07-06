@@ -31,6 +31,8 @@ non_numeric_cols = ['Song', 'Artist(s)', 'Emotion', 'Genre']
 df_numeric = df.drop(columns=non_numeric_cols, axis=1, errors='ignore')
 print(df_numeric.columns.tolist())
 
+assert song_info.index.equals(df_numeric.index), "Index mismatch!"
+
 # Trying Standard Deviation
 
 scaler = StandardScaler()
@@ -39,4 +41,8 @@ df[['Positiveness_T', 'Danceability_T', 'Energy_T', 'Popularity_T']] = scaler.fi
 # Saving Scaled Data
 
 df_scaled = df[['Positiveness_T', 'Danceability_T', 'Energy_T', 'Popularity_T']]
-df_scaled.to_csv('data/scaled_features.csv', index=False)
+df_scaled.to_csv('data/scaled_features.csv', index=True)
+
+# Saving Song Info
+
+song_info.to_csv('data/song_info.csv', index=True)
