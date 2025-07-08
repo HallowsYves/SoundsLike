@@ -1,6 +1,11 @@
 import pandas as pd
 
 def load_and_clean_data(filepath='spotify_dataset.csv'):
+    """
+        Opens given dataset, drops duplicate and missing values
+        returns two different dataframes.
+        One being a numeric df for clustering, with the other containing song info.
+    """
     try:
         df = pd.read_csv(filepath)
     except:
@@ -13,8 +18,6 @@ def load_and_clean_data(filepath='spotify_dataset.csv'):
     df.dropna(subset=feature_cols, inplace=True)
 
     df.drop_duplicates(subset=['Song', 'Artist(s)'], inplace=True, keep='first')
-
-
     df.reset_index(drop=True, inplace=True)
 
     df_numeric = df[feature_cols].copy()
