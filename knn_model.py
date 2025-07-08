@@ -26,6 +26,8 @@ knn = NearestNeighbors(n_neighbors=5)
 knn.fit(df_features)
 
 # #Find a prompting method
+#Idea for song recommendation, we finf the index of the song, get its scores and then 
+#get the songs near it
 test = [[1.0, 0.1, 0.1, .7]] # Positiveness, Dance, Energy, Popularity
 
 distances, indices = knn.kneighbors(test)
