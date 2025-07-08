@@ -4,10 +4,6 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from data_utils import load_and_clean_data
 
-# * DEBUG REMOVE THIS LATER
-pd.set_option('display.max_columns', None)
-pd.set_option('display.max_rows', None)
-
 
 df_numeric, song_info = load_and_clean_data()
 
