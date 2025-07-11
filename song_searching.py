@@ -1,20 +1,7 @@
-import pandas as pd
-from sklearn.neighbors import NearestNeighbors
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from sklearn.neighbors import NearestNeighbors
+from data_utils import load_data
 
-try:
-    df_features = pd.read_csv('data/scaled_features.csv', index_col=0)
-    print('found dataset')
-except FileNotFoundError:
-    print("could not find dataset")
-
-try:
-    df_song_info = pd.read_csv('data/song_info.csv', index_col=0)
-    print('found dataset')
-except FileNotFoundError:
-    print("could not find dataset")
+df_features = load_data('data/scaled_data.csv', index=True)
+df_song_info = load_data('data/song_data.csv', index=True)
 
 assert df_song_info.index.equals(df_features.index), "Index mismatch!"
 

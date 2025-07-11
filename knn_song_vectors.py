@@ -2,19 +2,10 @@ import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 import numpy as np
+from data_utils import load_data
 
-
-try:
-    df_features = pd.read_csv('data/scaled_features.csv', index_col=0)
-    print('found dataset')
-except FileNotFoundError:
-    print("could not find dataset")
-
-try:
-    df_song_info = pd.read_csv('data/song_info.csv', index_col=0)
-    print('found dataset')
-except FileNotFoundError:
-    print("could not find dataset")
+df_features = load_data('data/scaled_data.csv', index=True)
+df_song_info = load_data('data/song_data.csv', index=True)
 
 assert df_song_info.index.equals(df_features.index), "Index mismatch!"
 
@@ -23,12 +14,12 @@ knn = NearestNeighbors(n_neighbors=5)
 knn.fit(df_features)
 
 song_name = "Put You On"
-matching = df_song_info[df_song_info["Song"] == song_name].index
+matching = df_song_info[df_song_info["Song"] == song_name]
 
 if matching.empty:
     print("Song not found")
 else:
-    song_index = matching[0]
+    song_index = matching.index[0]
     song_vector = [df_features.loc[song_index].values]
 
     print(f" Song: {song_name} | Vector: {song_vector}")
@@ -64,7 +55,7 @@ else:
         plt.show()
 
     # Get vectors and labels for radar
-    features = ['Positiveness_T', 'Danceability_T', 'Energy_T', 'Popularity_T']
+    features = ['Positiveness_T', 'Danceability_T', 'Energy_T', 'Popularity_T', 'Liveness_T', 'Acousticness_T', 'Instrumentalness_T']
     vectors = recommendation_features[features].values
     labels = recommendation_info['Song'].values
 

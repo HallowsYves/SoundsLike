@@ -1,12 +1,9 @@
 import pandas as pd
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+from data_utils import load_data
 
-try:
-    df_scaled = pd.read_csv('data/scaled_features.csv', index_col=0)
-    print('found dataset')
-except FileNotFoundError:
-    print("could not find dataset")
+df_scaled = load_data('data/scaled_data.csv', index=True)
 
 def elbow_method(data, max_k):
     means = []
