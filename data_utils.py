@@ -45,15 +45,9 @@ def scale_data(filepath, index=False, save_path=None):
     """
     df = load_data(filepath, index)
 
-    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
-    if not numeric_cols:
-        raise ValueError("No numeric columns found to scale.")
-
     scaler = StandardScaler()
-    scaled_values = scaler.fit_transform(df[numeric_cols])
-    df_scaled = pd.DataFrame(scaled_values, columns=[col + "_T" for col in numeric_cols])
-
-    df_scaled.index = df.index
+    scaled_values = scaler.fit_transform(df)
+    df_scaled = pd.DataFrame(scaled_values, columns=[col + "_T" for col in df])
 
     if save_path:
         df_scaled.to_csv(save_path, index=True)
@@ -62,27 +56,28 @@ def scale_data(filepath, index=False, save_path=None):
     return df_scaled
 
 # Making the files here, because i didn't know where else to
-
-clean_data(
+"""
+full_clean = clean_data(
     filepath='data/spotify_dataset.csv',
     rename={'song': 'Song', 'emotion': 'Emotion'},
     duplicates=['Song', 'Artist(s)'],
     keep=[
+        'Artist(s)', 'Song', 'Emotion', 'Genre',
         'Positiveness', 'Danceability', 'Energy', 'Popularity',
         'Liveness', 'Acousticness', 'Instrumentalness'
     ],
-    save_path='data/numeric_data.csv'
+    save_path='data/clean_data.csv'
 )
 
-clean_data(
-    filepath='data/spotify_dataset.csv',
-    rename={'song': 'Song', 'emotion': 'Emotion'},
-    duplicates=['Song', 'Artist(s)'],
-    keep=['Artist(s)', 'Song', 'Emotion', 'Genre'],
-    save_path='data/song_data.csv'
-)
+df_numeric = full_clean[['Positiveness', 'Danceability', 'Energy', 'Popularity',
+        'Liveness', 'Acousticness', 'Instrumentalness']].copy()
+df_numeric.to_csv('data/numeric_data.csv')
+
+df_song = full_clean[['Artist(s)', 'Song', 'Emotion', 'Genre']].copy()
+df_song.to_csv('data/song_data.csv', index=True)
 
 scale_data('data/numeric_data.csv',
            index=True, 
-           save_path='data/scaled_data'
+           save_path='data/scaled_data.csv'
 )
+"""
