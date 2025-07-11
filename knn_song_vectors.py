@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from data_utils import load_data
 
+"""
+    Finds the song by its name
+    Retrieves its index to get its vector values
+    Runs it through knn to find the closets songs
+"""
+
 df_features = load_data('data/scaled_data.csv', index=True)
 df_song_info = load_data('data/song_data.csv', index=True)
 

@@ -1,9 +1,13 @@
-import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
 from data_utils import load_data
+
+"""
+    Takes in the scaled vectors (test)
+    Computes the distances and indicies from closest to farthest
+"""
 
 df_features = load_data('data/scaled_data.csv', index=True)
 df_song_info = load_data('data/song_data.csv', index=True)

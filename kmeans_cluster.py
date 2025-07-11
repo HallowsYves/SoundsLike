@@ -1,8 +1,11 @@
-import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from data_utils import load_data
+
+"""
+    Forms the K Means clusters based on the scaled data
+"""
 
 df_scaled = load_data('data/scaled_data.csv', index=True)
 

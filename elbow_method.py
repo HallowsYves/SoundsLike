@@ -3,6 +3,10 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from data_utils import load_data
 
+"""
+    Uses the elbow method to find the best cluster amount
+"""
+
 df_scaled = load_data('data/scaled_data.csv', index=True)
 
 def elbow_method(data, max_k):
@@ -25,4 +29,4 @@ def elbow_method(data, max_k):
 
 elbow_method(df_scaled, 10)
 
-# Good range between 5 or 6
+# Good range between 6 or 7

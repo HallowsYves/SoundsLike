@@ -1,5 +1,10 @@
 from data_utils import load_data
 
+
+"""
+    Find the vector of a song from its title
+"""
+
 df_features = load_data('data/scaled_data.csv', index=True)
 df_song_info = load_data('data/song_data.csv', index=True)
 
