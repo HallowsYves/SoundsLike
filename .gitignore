@@ -1,0 +1,7 @@
+.history
+/spotify_dataset.csv
+
+venv/
+
+*.csv
+data/
