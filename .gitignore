@@ -7,4 +7,4 @@ venv/
 data/
 
 ner/models/
-ner/model_output
+ner/model_output/
