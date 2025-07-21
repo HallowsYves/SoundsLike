@@ -17,3 +17,7 @@ df["embedding"] = df.progress_apply(embed_song_artist, axis=1)
 
 embeddings_array = np.vstack(df["embedding"].values)
 np.save("data/song_embeddings.npy", embeddings_array)
+
+embeddings = np.load("data/song_embeddings.npy")
+
+assert len(df) == len(embeddings), "mismatch between rows and embeddings"
