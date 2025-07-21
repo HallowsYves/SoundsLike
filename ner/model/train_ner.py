@@ -7,6 +7,11 @@ import torch
 import json
 import os
 
+"""
+    You have to run this twice, the first time to get model_output for all the logs
+    The second time to get models/distibert... which contains the main info
+    After you get the second one, you can delete model_output, or keep it
+"""
 # load
 def load_json(path):
     with open(path, "r") as f:

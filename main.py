@@ -32,9 +32,6 @@ def find_similar_songs(user_prompt, num_recommendations=5):
 
 
     assert df_song_info.index.equals(df_features.index), "Index mismatch!"
-    # if not df_song_info.index.equals(df_features.index):
-    #     print("Error: Index mismatch between song info and features dataframes.")
-    #     return
 
     # Find Vector of specified Song
     matching_songs = df_song_info[df_song_info["Song"].str.lower() == song_name.lower()]
