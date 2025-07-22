@@ -8,6 +8,8 @@ from tqdm import tqdm
     Takes each song and artist, combines them with "by" in the middle, and
     then encodes it. Creates an embedding of all the rows and converts it
     into a numpy array. 
+
+    *Important thing to note: embedding song_embeddings.npy takes around 2 hrs (at least for me...)
 """
 df = load_data('data/song_data.csv', index=True)
 model = SentenceTransformer("all-MiniLM-L6-v2")

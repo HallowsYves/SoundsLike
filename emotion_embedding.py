@@ -13,6 +13,7 @@ df = load_data("data/clean_data.csv", index=True)
 features = ["Positiveness", "Danceability", "Energy", "Popularity", "Liveness", "Acousticness", "Instrumentalness"]
 emotion_vectors = df.groupby("Emotion")[features].mean()
 
+# Could maybe be added into the clean section?
 exclude_emotions = {"thirst", "pink", "interest", "confusion", "angry", "True", "Love"}
 filtered_emotions = emotion_vectors[~emotion_vectors.index.isin(exclude_emotions)]
 
@@ -24,6 +25,7 @@ with open("data/emotion_labels.txt", "w") as f:
         f.write(label.lower().strip() + "\n")
 
 #Scale it now
+# One thing i would look into is the scaling measure to the original
 emotion_means = np.load("data/emotion_means.npy")
 scaler = StandardScaler()
 scaler.fit(df[features])

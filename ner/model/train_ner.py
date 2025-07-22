@@ -127,12 +127,8 @@ def compute_metrics(p):
         "accuracy": results["overall_accuracy"],
     }
 
-eval_dataloader = DataLoader(
-    tokenized_dataset["validation"],
-    batch_size=4,
-    collate_fn=data_collator
-)
-
+# Some redundancy here with "_" since we could use the for metrics
+# Could look into it later
 predictions, labels, _ = trainer.predict(tokenized_dataset["validation"])
 metrics = compute_metrics((predictions, labels))
 print(metrics)

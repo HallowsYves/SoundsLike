@@ -5,6 +5,7 @@ from sklearn.neighbors import NearestNeighbors
 from sentence_transformers import SentenceTransformer
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity
@@ -121,6 +122,36 @@ def find_similar_songs(user_prompt, num_recommendations=5):
     knn.fit(all_combined)
     distances, indices = knn.kneighbors([combined_vector])
     
+    # Plot KNN
+
+    # Apply PCA to reduce to 2D
+    pca = PCA(n_components=2)
+    pca_result = pca.fit_transform(all_combined)
+
+    # Get 2D positions for neighbors and example
+    test_2D = pca.transform([combined_vector])
+    neighbors_2D = pca_result[indices[0]]
+
+
+    # Plot all songs
+    plt.figure(figsize=(10, 6))
+    plt.scatter(pca_result[:, 0], pca_result[:, 1], alpha=0.2, label='All Songs', color='gray')
+
+    # Plot neighbors
+    plt.scatter(neighbors_2D[:, 0], neighbors_2D[:, 1], alpha=0.2, s=100, label='Nearest Neighbors', color='green')
+
+    # Plot the test point
+    plt.scatter(test_2D[:, 0], test_2D[:, 1], alpha=0.2, label='Your Prompt', color='red')
+
+    # Label
+    plt.title("KNN Visualization (PCA-Reduced to 2D)")
+    plt.xlabel("PCA 1")
+    plt.ylabel("PCA 2")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
     print("\nRecommended songs:")
     for idx in indices[0][1:]:
         row = df_song_info.iloc[idx]
