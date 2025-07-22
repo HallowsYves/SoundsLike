@@ -4,6 +4,11 @@ import numpy as np
 from data_utils import load_data
 from tqdm import tqdm
 
+"""
+    Takes each song and artist, combines them with "by" in the middle, and
+    then encodes it. Creates an embedding of all the rows and converts it
+    into a numpy array. 
+"""
 df = load_data('data/song_data.csv', index=True)
 model = SentenceTransformer("all-MiniLM-L6-v2")
 

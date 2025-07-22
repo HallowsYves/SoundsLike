@@ -10,6 +10,15 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import normalize
 import re
 
+"""
+    Cleans up the entries using clean_bert. Checks if there is anything for them(mood, song, or artist).
+    Finds the index from embedded searches, which is used to get the scaled vector. Then combines them,
+    running the input through KNN to find the songs.
+
+    *One thing to note which is strange, when i ran "moon by kanye" its giving me songs that include "earth" or "world"
+    that doesn't feel like it has much to do with the vector features, so something to look at. Maybe its using the actual
+    words as the vector instead of the features.
+"""
 # Load emotion means and labels
 emotion_means = np.load("data/emotion_means.npy")
 with open("data/emotion_labels.txt", "r") as f:
@@ -53,7 +62,6 @@ def find_similar_songs(user_prompt, num_recommendations=5):
     print(f"song: {song_name}")
     print(f"artist: {artist_name}")
     print(f"mood: {mood}")
-    song_vector = None
 
 
     if song_name or artist_name:
@@ -83,16 +91,12 @@ def find_similar_songs(user_prompt, num_recommendations=5):
 
     # Handle emotion embedding
     if mood:
-        # Embed the raw mood string using your model
         mood_embedding = embedder.encode(mood, normalize_embeddings=True)
 
-        # Compare the mood embedding to each emotion vector (which you already have as emotion_means)
-        embedded_labels = [embedder.encode(label) for label in emotion_labels]  # All 384-dim
+        embedded_labels = [embedder.encode(label) for label in emotion_labels] 
 
-        # Step 2: Compare NER-extracted mood with emotion label embeddings
-        sims = cosine_similarity([mood_embedding], embedded_labels)[0]  # Now shapes match
+        sims = cosine_similarity([mood_embedding], embedded_labels)[0]
 
-        # Step 3: Find best match
         best_match_idx = np.argmax(sims)
         matched_label = emotion_labels[best_match_idx]
         emotion_vector = emotion_means[best_match_idx]

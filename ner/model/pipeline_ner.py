@@ -1,17 +1,18 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 import os
-
+"""
+    Goes through the prompt and tokenizes it. Runs it through the trained NER model, and takes out
+    inputs which can be labeled with BIO. It then puts them in their appropriate entity and flushes it.
+"""
 # Load model and tokenizer
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Adjust to your project root
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # root
 
 model_path = os.path.join(BASE_DIR, "models", "distilbert-ner")
 
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForTokenClassification.from_pretrained(model_path)
-
-# Load model and tokenizer
 
 label_list = ["O", "B-MOOD", "B-SONG", "I-SONG", "B-ARTIST", "I-ARTIST"]
 
@@ -64,9 +65,3 @@ def ner_pipeline(text):
         entities[k] = " ".join(v) if v else None
 
     return entities
-
-
-# Example usage
-prompt = "I want happy songs like Happy by Pharell Williams"
-result = ner_pipeline(prompt)
-print(result)

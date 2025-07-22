@@ -3,6 +3,11 @@ import pandas as pd
 from data_utils import load_data
 from sklearn.preprocessing import StandardScaler
 
+"""
+    Gets all the features that were used to identify songs, gets their emotion column, and
+    the mean of the songs in there. Removes any rows that aren't needed. Then embeds them
+    and puts it into a numpy array, creating a txt file for the indexes
+"""
 df = load_data("data/clean_data.csv", index=True)
 
 features = ["Positiveness", "Danceability", "Energy", "Popularity", "Liveness", "Acousticness", "Instrumentalness"]

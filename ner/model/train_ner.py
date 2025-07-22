@@ -46,7 +46,6 @@ def tokenize_and_align(example):
             current_word = word_id
             labels.append(label_to_id[example["labels"][word_id]])
         else:
-            # Continuing a word: use I- label or same as previous
             labels.append(label_to_id[example["labels"][word_id]])
     tokenized["labels"] = labels
     return tokenized
@@ -63,7 +62,6 @@ model = AutoModelForTokenClassification.from_pretrained(
     label2id=label_to_id
 )
 
-# training "./model_output"
 args = TrainingArguments(
     output_dir="./ner/model_output",
     save_strategy="epoch",
@@ -135,14 +133,11 @@ eval_dataloader = DataLoader(
     collate_fn=data_collator
 )
 
-print("Evaluate...")
 predictions, labels, _ = trainer.predict(tokenized_dataset["validation"])
 metrics = compute_metrics((predictions, labels))
 print(metrics)
 
 # save
-print("Train...")
-#trainer.save_model("./ner/model_output")
 save_path = os.path.join(BASE_DIR, "models", "distilbert-ner")
 trainer.save_model(save_path)
 tokenizer.save_pretrained(save_path)

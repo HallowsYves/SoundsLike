@@ -4,6 +4,12 @@ from ner.model.pipeline_ner import ner_pipeline
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
+"""
+    Grabs the entity info, embeds song and artist to compare it to the embeddings in the dataset.
+    Uses the index to get the features vector set. For mood it just compares for a similar str and
+    uses the index to get the emotion vector. Then it just combines. 
+    Just for notice, the emotion vectors are not scaled, this is just to see them combine
+"""
 # Load everything once
 song_embeddings = np.load("data/song_embeddings.npy")
 scaled_song_features = pd.read_csv("data/scaled_data.csv").values
