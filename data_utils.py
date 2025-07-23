@@ -2,10 +2,19 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 def load_data(filepath, index=False):
-    """
-        Load in any filepath, returns the dataframe
-        index=False is used when using raw data
-        index=True is used when using your own (scaled, info, clean)
+    """Loads any csv files
+
+    Load in any filepath, returns the dataframe. 
+    Aside from error checking if the file is found,
+    it provides the user to use the first column in
+    their dataframe or not.
+
+    Args:
+        filepath: any filepath to a source of data
+        index: False for raw data; True when using your own (scaled, data, clean)
+    
+    Returns:
+        A dataframe from pandas
     """
     try:
         if index:
@@ -20,9 +29,18 @@ def load_data(filepath, index=False):
     return df
 
 def clean_data(filepath, index=False, rename=None, duplicates=None, keep=None, save_path=None):
-    """
-        Renames any columns, drops duplicates,
-        removes NaN, and saves to file
+    """Cleans up dataframes and saves them
+
+    Args:
+        filepath: uses the load_data() to load into a pandas dataframe.
+        index: sets the appropriate index shift in the rows.
+        rename: takes in a dictionary with the old and new names.
+        duplicates: takes a list with columns to drop duplicates in.
+        keep: takes a list of columns to drop rows with NaN values in and make the new df.
+        save_path: creates a new csv for the clean dataset.
+    
+    Returns:
+        The cleaned dataframe
     """
     df = load_data(filepath, index)
 
@@ -41,8 +59,19 @@ def clean_data(filepath, index=False, rename=None, duplicates=None, keep=None, s
     return df
 
 def scale_data(filepath, index=False, save_path=None):
-    """
-        Scales the data and adds "_T" to any columns put through it
+    """Scales the data and adds "_T" to any columns put through it
+
+    Using StandardScaler, the dataframe is scaled according
+    to its values. Then it loops through each column to add a
+    "_T" for "Transformed". Finally it saves it to a filepath.
+
+    Args:
+        filepath: uses the load_data() to load into a pandas dataframe.
+        index: sets the appropriate index shift in the rows.
+        save_path: creates a new csv for the scaled dataset.
+    
+    Returns:
+        The scaled dataframe
     """
     df = load_data(filepath, index)
 

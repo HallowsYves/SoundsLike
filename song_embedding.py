@@ -4,10 +4,12 @@ import numpy as np
 from data_utils import load_data
 from tqdm import tqdm
 
-"""
-    Takes each song and artist, combines them with "by" in the middle, and
-    then encodes it. Creates an embedding of all the rows and converts it
-    into a numpy array. 
+"""Embeds each song/artist and saves it as a numpy array
+
+    Goes through every row for song_data and encodes the 
+    columns 'Song' and 'Artist(s)' as "{Song} by {Artist(s)}".
+    It stores all of them in their appropraite index under 
+    the column embedding, which is used for the numpy array.
 
     *Important thing to note: embedding song_embeddings.npy takes around 2 hrs (at least for me...)
 """

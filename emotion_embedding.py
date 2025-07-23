@@ -3,10 +3,14 @@ import pandas as pd
 from data_utils import load_data
 from sklearn.preprocessing import StandardScaler
 
-"""
-    Gets all the features that were used to identify songs, gets their emotion column, and
-    the mean of the songs in there. Removes any rows that aren't needed. Then embeds them
-    and puts it into a numpy array, creating a txt file for the indexes
+"""Uses the mean of Emotion features to be scaled for a numpy array
+
+    Groups each individual emotion by its features and grabs their means.
+    Filters out any emotions not needed, and creates a base numpy array
+    along with a key txt file. Then using the base .npy, it scales it 
+    according to how the songs and artists were scaled and saves the new
+    vectors into a numpy array.
+
 """
 df = load_data("data/clean_data.csv", index=True)
 
