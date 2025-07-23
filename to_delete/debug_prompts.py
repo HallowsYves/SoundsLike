@@ -21,7 +21,7 @@ def debug_match(query: str, top_k=5):
     similarities = cosine_similarity([query_embedding], song_embeddings)[0]
     top_k_indices = np.argsort(similarities)[::-1][:top_k]
     
-    print(f"\n🔍 Top {top_k} matches for: \"{query}\"\n")
+    print(f"\n Top {top_k} matches for: \"{query}\"\n")
     for i, idx in enumerate(top_k_indices):
         row = df.iloc[idx]
         score = similarities[idx]
