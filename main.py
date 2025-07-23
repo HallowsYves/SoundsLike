@@ -22,7 +22,7 @@ import re
     words as the vector instead of the features.
 """
 # Load emotion means and labels
-emotion_means = np.load("data/emotion_means.npy")
+scaled_emotion_means = np.load("data/scaled_emotion_means.npy")
 with open("data/emotion_labels.txt", "r") as f:
     emotion_labels = [line.strip() for line in f.readlines()]
 
@@ -39,6 +39,8 @@ assert df_song_info.index.equals(df_scaled_features.index), "Index mismatch!"
 assert len(df_song_info) == len(song_embeddings), "Mismatch between song info and embeddings"
 
 def clean_bert_output(text: str) -> str:
+    if not text:
+        return ""
     # Remove special tokens like [SEP], [CLS], etc.
     text = re.sub(r"\[.*?\]", "", text)
 
@@ -101,32 +103,31 @@ def find_similar_songs(user_prompt, num_recommendations=5):
 
         best_match_idx = np.argmax(sims)
         matched_label = emotion_labels[best_match_idx]
-        emotion_vector = emotion_means[best_match_idx]
+        emotion_vector = scaled_emotion_means[best_match_idx]
 
         print(f"Mapped '{mood}' to closest emotion: {matched_label} (cos sim: {sims[best_match_idx]:.3f})")
+        print(f"Best match: {matched_label}")
+        print(f"Vector smaple: {emotion_vector}")
     else:
         print("No mood provided, using neutral vector.")
-        emotion_vector = np.zeros(emotion_means.shape[1])
+        emotion_vector = np.zeros(scaled_emotion_means.shape[1])
 
-    combined_vector = np.concatenate([song_vector, emotion_vector])
+    assert song_vector.shape == emotion_vector.shape, "Mismatch in feature vector dimensions"
+    
+    combined_vector = song_vector + emotion_vector
     print(f"\nQuery vector shape: {combined_vector.shape}")
-
-    # Combine all vectors in dataset
-    all_combined = np.concatenate([
-        df_scaled_features.values,
-        np.tile(emotion_vector, (df_scaled_features.shape[0], 1))
-    ], axis=1)
+    print(f"Combined vector smaple: {combined_vector}")
 
     # Run KNN
     knn = NearestNeighbors(n_neighbors=num_recommendations + 1)
-    knn.fit(all_combined)
+    knn.fit(df_scaled_features)
     distances, indices = knn.kneighbors([combined_vector])
     
     # Plot KNN
 
     # Apply PCA to reduce to 2D
     pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(all_combined)
+    pca_result = pca.fit_transform(df_scaled_features)
 
     # Get 2D positions for neighbors and example
     test_2D = pca.transform([combined_vector])
