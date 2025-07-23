@@ -11,7 +11,7 @@ from sentence_transformers import SentenceTransformer
 from ner.model.pipeline_ner import ner_pipeline
 from data_utils import load_data
 
-# --- Load models and data ---
+# Load models and data 
 embedder = SentenceTransformer("all-MiniLM-L6-v2")
 df_scaled_features = load_data("data/scaled_data.csv", index=True)
 df_song_info = load_data("data/song_data.csv", index=True)
@@ -24,8 +24,19 @@ with open("data/emotion_labels.txt", "r") as f:
 assert df_song_info.index.equals(df_scaled_features.index), "Index mismatch!"
 assert len(df_song_info) == len(song_embeddings), "Mismatch in song info and embeddings"
 
-# --- Helper functions ---
+# Helper functions 
 def clean_bert_output(text: str) -> str:
+    """Cleans bert text
+
+    Removes anything between [] because of [CLS] in tokens.
+    Adds words together the are taken apart using 
+    WordPiece tokenization, which start with ##
+
+    Arg:
+        text: tokenized text from NER pipeline
+    Returns:
+        Clean text with no past token marks
+    """
     if not text:
         return ""
     text = re.sub(r"\[.*?\]", "", text)
@@ -39,6 +50,18 @@ def clean_bert_output(text: str) -> str:
     return " ".join(cleaned)
 
 def get_song_vector(song_name, artist_name):
+    """Finds the inputs closest song vector
+
+    Creates an embedded query based on song and/or artist.
+    Find's the closest match using cosine and grabs the index.
+    The index is used on the song database to get its vector.
+
+    Args:
+        song_name: a string that is a song
+        artist_name: a string that is an artist
+    Returns:
+        A vector made up of the chosen features
+    """
     if song_name or artist_name:
         query = f"{song_name} by {artist_name}" if song_name and artist_name else song_name or artist_name
         embedding = embedder.encode(query, normalize_embeddings=True)
@@ -56,9 +79,20 @@ def get_song_vector(song_name, artist_name):
     return np.zeros(df_scaled_features.shape[1])
 
 def get_emotion_vector(mood):
+    """Finds the inputs closest emotion vector
+    
+    Embeds the mood and labels, normalizing their vectors.
+    Find's the closest match using cosine and grabs the index.
+    The index is used on the emotion database to get its vector.
+
+    Args:
+        mood: a string that is an emotion
+    Returns:
+        A vector made up of the chosen features
+    """
     if mood:
         mood_embedding = embedder.encode(mood, normalize_embeddings=True)
-        label_embeddings = [embedder.encode(label) for label in emotion_labels]
+        label_embeddings = [embedder.encode(label, normalize_embeddings=True) for label in emotion_labels]
         sims = cosine_similarity([mood_embedding], label_embeddings)[0]
         idx = np.argmax(sims)
         print(f"Mapped '{mood}' to closest emotion: {emotion_labels[idx]} (cos sim: {sims[idx]:.3f})")
