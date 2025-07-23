@@ -101,12 +101,36 @@ def get_emotion_vector(mood):
     return np.zeros(scaled_emotion_means.shape[1])
 
 def run_knn(query_vector, k=5):
+    """Setting up a K Nearest Neighbors graph
+
+    Define how many neighbors you want back, then plot 
+    all the points onto the graph. A query is used 
+    define the central point and those around.
+
+    Args:
+        query_vector: a vector consisting of the features used to fit
+        k: the amount of indices to be returned
+    Returns:
+        The indices of the closest points to the query plot
+    """
     knn = NearestNeighbors(n_neighbors=k + 1)
     knn.fit(df_scaled_features)
     distances, indices = knn.kneighbors([query_vector])
     return indices
 
 def plot_pca(query_vector, indices):
+    """Visualises a 2D plot for the query and indicies
+
+    Uses Principal Component Analysis to turn all the
+    vectors into 2D. It has 3 different targets: background (gray),
+    query (red), and neighbor (green) points. 
+
+    Args:
+        query_vector: a vector consisting of the features used to plot
+        indicies: the closest vectors to the query_vector
+    Returns:
+        Nothing, but a plot does pop out with the points marked 
+    """
     pca = PCA(n_components=2)
     pca_result = pca.fit_transform(df_scaled_features)
     test_2D = pca.transform([query_vector])
@@ -125,6 +149,20 @@ def plot_pca(query_vector, indices):
     plt.show()
 
 def create_radar_chart(vectors, labels, features, song_name):
+    """Creates a radar chart using the vectors
+
+    Splits a circle beetween the amount of angles. 
+    Assigns labels to vectors, which are then graphed
+    according to their features.
+
+    Args:
+        vectors: the numbers used to chart it
+        labels: the song names to each chart
+        features: the labels for the xtick
+        song_name: used for the title
+    Returns:
+        Nothing, but a chart shows itself with all the vectors
+    """
     num_vars = len(features)
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
     angles += angles[:1]
@@ -143,6 +181,18 @@ def create_radar_chart(vectors, labels, features, song_name):
     plt.show()
 
 def find_similar_songs(user_prompt, num_recommendations=5):
+    """Finds similar songs according to the prompt
+
+    Uses the NER pipeline to decipher the entities in the prompt.
+    Finds the vectors for each of them, combines them, and runs
+    it through KNN to get the most similar songs.
+
+    Args:
+        user_prompt: an input that details mood, song, and/or artist
+        num_recommendations: the amount of songs the user wants
+    Returns:
+        Nothing, just terminal prints and matplot plots
+    """
     entities = ner_pipeline(user_prompt)
     song = clean_bert_output(entities.get("song"))
     artist = clean_bert_output(entities.get("artist"))
