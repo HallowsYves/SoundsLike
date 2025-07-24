@@ -5,3 +5,6 @@ venv/
 
 *.csv
 data/
+
+ner/models/
+ner/model_output/

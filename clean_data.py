@@ -1,8 +1,10 @@
 from data_utils import clean_data, scale_data
 
-"""
-    Creates 3 files: clean_data, song_data, and scaled_data
-    Pass in values that you want to adjust
+"""Cleans, splits, and scales the original dataset
+
+    Cleans the spotify dataset to keep only 11 columns.
+    Then it's split into 2 dataframes: numeric and alphabetic.
+    It only scales the numeric values for the KNN graph. 
 """
 
 full_clean = clean_data(

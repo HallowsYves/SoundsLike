@@ -1,0 +1,178 @@
+[
+  {
+    "tokens": ["Play", "something", "happy", "like", "Levitating", "by", "Dua", "Lipa"],
+    "labels": ["O", "O", "B-MOOD", "O", "B-SONG", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["I", "want", "scary", "songs", "like", "Disturbia", "by", "Rihanna"],
+    "labels": ["O", "O", "B-MOOD", "O", "O", "B-SONG", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Give", "me", "romantic", "music", "by", "Ed", "Sheeran"],
+    "labels": ["O", "O", "B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Songs", "like", "Love", "Story", "by", "Taylor", "Swift"],
+    "labels": ["O", "O", "B-SONG", "I-SONG", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Angry", "vibes", "like", "DNA", "by", "Kendrick", "Lamar"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Chill", "songs", "from", "Frank", "Ocean"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["I'm", "in", "the", "mood", "for", "melancholy", "tracks"],
+    "labels": ["O", "O", "O", "O", "O", "B-MOOD", "O"]
+  },
+  {
+    "tokens": ["Listen", "to", "Fear", "by", "Kendrick", "Lamar"],
+    "labels": ["O", "O", "B-SONG", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Play", "Surprise", "by", "Chlöe"],
+    "labels": ["O", "B-SONG", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Calm", "music", "like", "Sunflower", "by", "Post", "Malone"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Fearful", "songs", "similar", "to", "Haunted"],
+    "labels": ["B-MOOD", "O", "O", "O", "B-SONG"]
+  },
+  {
+    "tokens": ["Joyful", "music", "by", "BTS"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Drake", "love", "songs", "like", "Hold", "On", "We're", "Going", "Home"],
+    "labels": ["B-ARTIST", "B-MOOD", "O", "O", "B-SONG", "I-SONG", "I-SONG", "I-SONG", "I-SONG"]
+  },
+  {
+    "tokens": ["Find", "angry", "songs", "like", "Kill", "This", "Love", "by", "BLACKPINK"],
+    "labels": ["O", "B-MOOD", "O", "O", "B-SONG", "I-SONG", "I-SONG", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Uplifting", "tracks", "by", "Coldplay"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Relaxed", "music", "like", "Location", "by", "Khalid"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Scary", "songs", "like", "Thriller"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG"]
+  },
+  {
+    "tokens": ["Put", "on", "some", "sad", "tracks"],
+    "labels": ["O", "O", "O", "B-MOOD", "O"]
+  },
+  {
+    "tokens": ["Find", "songs", "like", "Falling", "by", "Harry", "Styles"],
+    "labels": ["O", "O", "O", "B-SONG", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Angry", "music", "from", "Linkin", "Park"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Songs", "like", "Scary", "Love", "by", "The", "Neighbourhood"],
+    "labels": ["O", "O", "B-SONG", "I-SONG", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Surprising", "tracks", "from", "Imagine", "Dragons"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Excited", "vibes", "like", "Party", "Rock", "Anthem"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG", "I-SONG", "I-SONG"]
+  },
+  {
+    "tokens": ["Fear", "based", "songs", "like", "bury", "a", "friend"],
+    "labels": ["B-MOOD", "O", "O", "O", "B-SONG", "I-SONG", "I-SONG"]
+  },
+  {
+    "tokens": ["Love", "songs", "by", "Adele"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Melancholy", "tunes", "like", "Someone", "You", "Loved"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG", "I-SONG", "I-SONG"]
+  },
+  {
+    "tokens": ["Songs", "similar", "to", "Scared", "of", "the", "Dark"],
+    "labels": ["O", "O", "O", "B-SONG", "I-SONG", "I-SONG", "I-SONG"]
+  },
+  {
+    "tokens": ["Relaxing", "music", "like", "Ocean", "Eyes"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG", "I-SONG"]
+  },
+  {
+    "tokens": ["Moody", "songs", "by", "Lana", "Del", "Rey"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Joy", "songs", "like", "Good", "as", "Hell"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG", "I-SONG", "I-SONG"]
+  },
+  {
+    "tokens": ["Give", "me", "calm", "tracks", "like", "Yellow"],
+    "labels": ["O", "O", "B-MOOD", "O", "O", "B-SONG"]
+  },
+  {
+    "tokens": ["Find", "a", "song", "like", "Sad", "by", "XXXTentacion"],
+    "labels": ["O", "O", "O", "O", "B-SONG", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Play", "romantic", "songs", "like", "Perfect", "by", "Ed", "Sheeran"],
+    "labels": ["O", "B-MOOD", "O", "O", "B-SONG", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Joyful", "melodies", "from", "Shawn", "Mendes"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Play", "DNA", "by", "BTS"],
+    "labels": ["O", "B-SONG", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Exciting", "songs", "like", "Bang", "Bang", "Bang"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG", "I-SONG", "I-SONG"]
+  },
+  {
+    "tokens": ["Get", "moody", "vibes", "like", "After", "Dark"],
+    "labels": ["O", "B-MOOD", "O", "O", "B-SONG", "I-SONG"]
+  },
+  {
+    "tokens": ["Love", "ballads", "from", "Bruno", "Mars"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["Show", "me", "songs", "like", "Falling", "by", "Harry", "Styles"],
+    "labels": ["O", "O", "O", "O", "B-SONG", "O", "B-ARTIST", "I-ARTIST"]
+  },
+  {
+    "tokens": ["I", "want", "fearful", "songs", "like", "Haunted", "by", "Beyoncé"],
+    "labels": ["O", "O", "B-MOOD", "O", "O", "B-SONG", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Calm", "songs", "like", "Gravity"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG"]
+  },
+  {
+    "tokens": ["Romantic", "music", "by", "SZA"],
+    "labels": ["B-MOOD", "O", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Find", "sad", "songs", "like", "Moon", "by", "Kanye"],
+    "labels": ["O", "B-MOOD", "O", "O", "B-SONG", "O", "B-ARTIST"]
+  },
+  {
+    "tokens": ["Surprising", "tracks", "like", "Toxic"],
+    "labels": ["B-MOOD", "O", "O", "B-SONG"]
+  }
+]
