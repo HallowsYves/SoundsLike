@@ -3,7 +3,7 @@
 
 venv/
 
-*.csv
+# *.csv
 # data/
 
 # ner/models/
