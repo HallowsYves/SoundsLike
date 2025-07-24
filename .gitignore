@@ -4,7 +4,10 @@
 venv/
 
 *.csv
-data/
+# data/
 
-ner/models/
+# ner/models/
 ner/model_output/
+
+*.log
+__pycache__/
