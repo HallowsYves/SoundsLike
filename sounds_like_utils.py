@@ -1,16 +1,9 @@
 import re
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.neighbors import NearestNeighbors
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import normalize
-from sentence_transformers import SentenceTransformer
-from ner.model.pipeline_ner import ner_pipeline
-from data_utils import load_data
-
-
 
 
 def clean_bert_output(text: str) -> str:
@@ -37,7 +30,7 @@ def clean_bert_output(text: str) -> str:
             cleaned.append(token)
     return " ".join(cleaned)
 
-def get_song_vector(song_name, artist_name):
+def get_song_vector(song_name, artist_name, embedder, df_song_info, song_embeddings, df_scaled_features):
     """Finds the inputs closest song vector
 
     Creates an embedded query based on song and/or artist.
@@ -66,7 +59,7 @@ def get_song_vector(song_name, artist_name):
     print("No song or artist provided, using fallback vector.")
     return np.zeros(df_scaled_features.shape[1])
 
-def get_emotion_vector(mood):
+def get_emotion_vector(mood, embedder, scaled_emotion_means, emotion_labels):
     """Finds the inputs closest emotion vector
     
     Embeds the mood and labels, normalizing their vectors.
@@ -83,12 +76,12 @@ def get_emotion_vector(mood):
         label_embeddings = [embedder.encode(label, normalize_embeddings=True) for label in emotion_labels]
         sims = cosine_similarity([mood_embedding], label_embeddings)[0]
         idx = np.argmax(sims)
-        print(f"Mapped '{mood}' to closest emotion: {emotion_labels[idx]} (cos sim: {sims[idx]:.3f})")
+        print(f"Mapped '{mood}' to closest emotion: {emotion_labels[idx]}")
         return scaled_emotion_means[idx]
     print("No mood provided, using neutral vector.")
     return np.zeros(scaled_emotion_means.shape[1])
 
-def run_knn(query_vector, k=5):
+def run_knn(query_vector, df_scaled_features, k=5):
     """Setting up a K Nearest Neighbors graph
 
     Define how many neighbors you want back, then plot 
@@ -106,7 +99,7 @@ def run_knn(query_vector, k=5):
     distances, indices = knn.kneighbors([query_vector])
     return indices
 
-def plot_pca(query_vector, indices):
+def plot_pca(query_vector, indices, df_scaled_features):
     """Visualises a 2D plot for the query and indicies
 
     Uses Principal Component Analysis to turn all the
@@ -124,17 +117,18 @@ def plot_pca(query_vector, indices):
     test_2D = pca.transform([query_vector])
     neighbors_2D = pca_result[indices[0]]
 
-    plt.figure(figsize=(10, 6))
-    plt.scatter(pca_result[:, 0], pca_result[:, 1], alpha=0.2, label='All Songs', color='gray')
-    plt.scatter(neighbors_2D[:, 0], neighbors_2D[:, 1], alpha=0.2, s=100, label='Nearest Neighbors', color='green')
-    plt.scatter(test_2D[:, 0], test_2D[:, 1], alpha=0.2, label='Your Prompt', color='red')
-    plt.title("KNN Visualization (PCA-Reduced to 2D)")
-    plt.xlabel("PCA 1")
-    plt.ylabel("PCA 2")
-    plt.legend()
-    plt.grid(True)
+    fig, ax = plt.subplots(figsize=(10, 6)) # Create figure and axes
+    ax.scatter(pca_result[:, 0], pca_result[:, 1], alpha=0.2, label='All Songs', color='gray')
+    ax.scatter(neighbors_2D[:, 0], neighbors_2D[:, 1], alpha=0.2, s=100, label='Nearest Neighbors', color='green')
+    ax.scatter(test_2D[:, 0], test_2D[:, 1], alpha=0.2, label='Your Prompt', color='red')
+    ax.set_title("KNN Visualization (PCA-Reduced to 2D)")
+    ax.set_xlabel("PCA 1")
+    ax.set_ylabel("PCA 2")
+    ax.legend()
+    ax.grid(True)
     plt.tight_layout()
-    plt.show()
+    
+    return fig 
 
 def create_radar_chart(vectors, labels, features, song_name):
     """Creates a radar chart using the vectors
@@ -168,7 +162,7 @@ def create_radar_chart(vectors, labels, features, song_name):
     plt.tight_layout()
     plt.show()
 
-def find_similar_songs(user_prompt, num_recommendations=5):
+def find_similar_songs(user_prompt, num_recommendations, ner_pipeline, embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels):    
     """Finds similar songs according to the prompt
 
     Uses the NER pipeline to decipher the entities in the prompt.
@@ -185,27 +179,41 @@ def find_similar_songs(user_prompt, num_recommendations=5):
     song = clean_bert_output(entities.get("song"))
     artist = clean_bert_output(entities.get("artist"))
     mood = entities.get("mood")
-    print(f"song: {song}\nartist: {artist}\nmood: {mood}")
 
-    song_vec = get_song_vector(song, artist)
-    emotion_vec = get_emotion_vector(mood)
+    song_match_info = f"Detected Song: **{song if song else 'N/A'}**"
+    artist_match_info = f"Detected Artist: **{artist if artist else 'N/A'}**"
+    mood_match_info = f"Detected Mood: **{mood if mood else 'N/A'}**"
 
+    print(song_match_info)
+    print(artist_match_info)
+    print(mood_match_info)
+
+    song_vec = get_song_vector(song, artist, embedder, df_song_info, song_embeddings, df_scaled_features)
+    emotion_vec = get_emotion_vector(mood, embedder, scaled_emotion_means, emotion_labels)
     assert song_vec.shape == emotion_vec.shape, "Mismatch in feature vector dimensions"
 
     combined_vec = song_vec + emotion_vec
     print(f"\nQuery vector shape: {combined_vec.shape}")
     print(f"Combined vector sample: {combined_vec}")
 
-    indices = run_knn(combined_vec, num_recommendations)
-    plot_pca(combined_vec, indices)
+    indices = run_knn(combined_vec, df_scaled_features, num_recommendations)
+    pca_plot_fig = plot_pca(combined_vec, indices, df_scaled_features)
 
-    print("\nRecommended songs:")
+    recommendations = []
     for idx in indices[0][1:]:
         row = df_song_info.iloc[idx]
-        print(f"- {row['Song']} by {row['Artist(s)']}")
+        recommendations.append(f"- **{row['Song']}** by **{row['Artist(s)']}**")
 
     features = ['Positiveness_T', 'Danceability_T', 'Energy_T', 'Popularity_T', 'Liveness_T', 'Acousticness_T', 'Instrumentalness_T']
     trimmed_vec = combined_vec[:len(features)]
     vectors = [trimmed_vec] + df_scaled_features.iloc[indices[0][1:]][features].values.tolist()
     labels = ['Your Input'] + df_song_info.iloc[indices[0][1:]]['Song'].tolist()
-    create_radar_chart(vectors, labels, features, song)
+    radar_chart_fig = create_radar_chart(vectors, labels, features, song if song else 'Your Input')
+
+    return {
+        'recommendations': recommendations,
+        'pca_plot': pca_plot_fig,
+        'radar_chart': radar_chart_fig,
+        'song_match_info': song_match_info,
+        'mood_match_info': mood_match_info
+    }
