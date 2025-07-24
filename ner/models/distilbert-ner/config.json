@@ -1,0 +1,39 @@
+{
+  "activation": "gelu",
+  "architectures": [
+    "DistilBertForTokenClassification"
+  ],
+  "attention_dropout": 0.1,
+  "dim": 768,
+  "dropout": 0.1,
+  "hidden_dim": 3072,
+  "id2label": {
+    "0": "O",
+    "1": "B-MOOD",
+    "2": "B-SONG",
+    "3": "I-SONG",
+    "4": "B-ARTIST",
+    "5": "I-ARTIST"
+  },
+  "initializer_range": 0.02,
+  "label2id": {
+    "B-ARTIST": 4,
+    "B-MOOD": 1,
+    "B-SONG": 2,
+    "I-ARTIST": 5,
+    "I-SONG": 3,
+    "O": 0
+  },
+  "max_position_embeddings": 512,
+  "model_type": "distilbert",
+  "n_heads": 12,
+  "n_layers": 6,
+  "pad_token_id": 0,
+  "qa_dropout": 0.1,
+  "seq_classif_dropout": 0.2,
+  "sinusoidal_pos_embds": false,
+  "tie_weights_": true,
+  "torch_dtype": "float32",
+  "transformers_version": "4.53.1",
+  "vocab_size": 30522
+}

@@ -3,8 +3,11 @@
 
 venv/
 
-*.csv
-data/
+# *.csv
+# data/
 
-ner/models/
+# ner/models/
 ner/model_output/
+
+*.log
+__pycache__/
