@@ -1,5 +1,7 @@
 import re
+import os
 import numpy as np
+from slugify import slugify
 import matplotlib.pyplot as plt
 from sklearn.neighbors import NearestNeighbors
 from sklearn.decomposition import PCA
@@ -97,7 +99,7 @@ def run_knn(query_vector, df_scaled_features, k=5):
     knn = NearestNeighbors(n_neighbors=k + 1)
     knn.fit(df_scaled_features)
     distances, indices = knn.kneighbors([query_vector])
-    return indices
+    return distances, indices
 
 def plot_pca(query_vector, indices, df_scaled_features):
     """Visualises a 2D plot for the query and indicies
@@ -130,7 +132,7 @@ def plot_pca(query_vector, indices, df_scaled_features):
     
     return fig 
 
-def create_radar_chart(vectors, labels, features, song_name):
+def create_radar_chart(vector, title, features, output_dir="output"):
     """Creates a radar chart using the vectors
 
     Splits a circle beetween the amount of angles. 
@@ -146,21 +148,44 @@ def create_radar_chart(vectors, labels, features, song_name):
         Nothing, but a chart shows itself with all the vectors
     """
     num_vars = len(features)
+
+    # Create angle slices
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
     angles += angles[:1]
+    
+    if isinstance(vector, np.ndarray):
+        values = vector.tolist()
+    else:
+        values = list(vector)
 
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
-    for vec, label in zip(vectors, labels):
-        values = vec.tolist() if not isinstance(vec, list) else vec
-        values += values[:1]
-        ax.plot(angles, values, label=label)
-        ax.fill(angles, values, alpha=0.1)
+    values = values + values[:1]  # close the loop
+    
+
+    # Init plot
+    print(f"[DEBUG] angles length: {len(angles)}")
+    print(f"[DEBUG] values length: {len(values)}")
+
+    fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
+    ax.plot(angles, values, color="blue", linewidth=2)
+    ax.fill(angles, values, color="blue", alpha=0.25)
+    ax.set_title(title, size=11, pad=20)
+
+    # Set labels
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(features)
-    ax.set_title(f"Feature Comparison: {song_name} & Neighbors")
-    ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+    ax.set_yticklabels([])
+
+    # Save to file
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    filename = f"radar_{slugify(title)}.png"
+    filepath = os.path.join(output_dir, filename)
     plt.tight_layout()
-    plt.show()
+    fig.savefig(filepath, dpi=150)
+    plt.close(fig)
+
+    return filepath
 
 def find_similar_songs(user_prompt, num_recommendations, ner_pipeline, embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels):    
     """Finds similar songs according to the prompt
@@ -196,24 +221,51 @@ def find_similar_songs(user_prompt, num_recommendations, ner_pipeline, embedder,
     print(f"\nQuery vector shape: {combined_vec.shape}")
     print(f"Combined vector sample: {combined_vec}")
 
-    indices = run_knn(combined_vec, df_scaled_features, num_recommendations)
-    pca_plot_fig = plot_pca(combined_vec, indices, df_scaled_features)
+    print("Running KNN with vector shape:", combined_vec.shape)
+    print("Data shape:", df_scaled_features.shape)  
 
-    recommendations = []
-    for idx in indices[0][1:]:
-        row = df_song_info.iloc[idx]
-        recommendations.append(f"- **{row['Song']}** by **{row['Artist(s)']}**")
+    distances, indices = run_knn(combined_vec, df_scaled_features, num_recommendations)
+    print("Distances:", distances)
+    print("Indices:", indices)
+    
+    top_indices = indices[0]
+    top_distances = distances[0]
 
     features = ['Positiveness_T', 'Danceability_T', 'Energy_T', 'Popularity_T', 'Liveness_T', 'Acousticness_T', 'Instrumentalness_T']
-    trimmed_vec = combined_vec[:len(features)]
-    vectors = [trimmed_vec] + df_scaled_features.iloc[indices[0][1:]][features].values.tolist()
-    labels = ['Your Input'] + df_song_info.iloc[indices[0][1:]]['Song'].tolist()
-    radar_chart_fig = create_radar_chart(vectors, labels, features, song if song else 'Your Input')
+    radar_images = []
+    for idx in top_indices:
+        vec = df_scaled_features.iloc[idx]
+        title = df_song_info.iloc[idx]["Artist(s)"]
+        radar_path = create_radar_chart(vec, title, features)
+        radar_images.append(radar_path)
+
+    main_idx = top_indices[0]
+    main_dist = top_distances[0]
+    main_song_data = df_song_info.iloc[main_idx]
+
+    main_song = {
+        "title": main_song_data['Song'],
+        "artist": main_song_data['Artist(s)'],
+        "score": 1 - main_dist,
+        "album_art": "img/cover_art.jpg",
+        "radar_chart": radar_images[0]
+    }
+
+    similar_songs = []
+    for i, (idx, dist) in enumerate(zip(top_indices[1:], top_distances[1:])):
+        song = df_song_info.iloc[idx]
+        similar_songs.append({
+            "title": song['Song'],
+            "artist": song['Artist(s)'],
+            "score": 1 - dist,
+            "album_art": "img/cover_art.jpg",
+            "radar_chart": radar_images[i + 1] 
+        })
 
     return {
-        'recommendations': recommendations,
-        'pca_plot': pca_plot_fig,
-        'radar_chart': radar_chart_fig,
-        'song_match_info': song_match_info,
-        'mood_match_info': mood_match_info
+        "main_song": main_song,
+        "similar_songs": similar_songs,
+        "song_match_info":song_match_info,
+        "artist_match_info": artist_match_info,
+        "mood_match_info": mood_match_info
     }
