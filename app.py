@@ -9,6 +9,7 @@ from sentence_transformers import SentenceTransformer
 
 
 @st._cache_resource
+
 def load_model_and_data():
     embedder = SentenceTransformer("all-MiniLM-L6-v2")
     df_scaled_features = load_data("data/scaled_data.csv", index=True)
@@ -21,4 +22,5 @@ def load_model_and_data():
         emotion_lables = [line.strip() for line in file.readlines()]
     return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_lables
 
+st.title('Playlist Prompter')
 embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels = load_model_and_data()
