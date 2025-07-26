@@ -64,7 +64,7 @@ with st.container():
         with col2:
             st.markdown(f"**{main_song['title']}** by **{main_song['artist']}**")
             st.markdown(f"**Score**: {main_song['score']:.2f}")
-            st.image(main_song["radar_chart"], caption="Your Input vs Song Features", use_column_width=True)
+            st.image(main_song["radar_chart"], caption="Your Input vs Song Features", use_container_width=True)
 
         # Recommended Songs
         st.markdown("---")
@@ -76,4 +76,4 @@ with st.container():
             with col2:
                 st.markdown(f"**{rec['title']}** by **{rec['artist']}**")
                 st.markdown(f"**Score**: {rec['score']:.2f}")
-                st.image(rec["radar_chart"], use_column_width=True)
+                st.image(rec["radar_chart"], use_container_width=True)
