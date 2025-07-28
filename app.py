@@ -50,6 +50,7 @@ with st.container():
 
         result = find_similar_songs(
             user_prompt=prompt_for_engine,
+            input_song=exact_match,
             num_recommendations=num_recs,
             ner_pipeline=ner_pipeline,
             embedder=embedder,
