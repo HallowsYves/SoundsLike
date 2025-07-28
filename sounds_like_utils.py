@@ -204,7 +204,7 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
 
     if best_match and best_match[1] >= threshold:
         matched_title = best_match
-        return song_df[song_df['Song'] == matched_title.iloc[0]]
+        return song_df['Song'] == matched_title[0]
     
     return None
 
