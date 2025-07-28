@@ -98,6 +98,7 @@ def get_emotion_vector(mood):
         sims = cosine_similarity([mood_embedding], label_embeddings)[0]
         idx = np.argmax(sims)
         print(f"Mapped '{mood}' to closest emotion: {emotion_labels[idx]} (cos sim: {sims[idx]:.3f})")
+        print(f"Mood Vector: {scaled_emotions[idx]}")
         return scaled_emotions[idx]
     print("No mood provided, using neutral vector.")
     return np.zeros(scaled_emotions.shape[1])
@@ -206,7 +207,14 @@ def find_similar_songs(user_prompt, num_recommendations=5):
 
     assert song_vec.shape == emotion_vec.shape, "Mismatch in feature vector dimensions"
 
-    combined_vec = song_vec + emotion_vec
+
+    if np.all(song_vec == 0):
+        combined_vec = emotion_vec
+    elif np.all(emotion_vec == 0):
+        combined_vec = song_vec
+    else:
+        combined_vec = (song_vec * .7 ) + (emotion_vec *.3)
+
     print(f"\nQuery vector shape: {combined_vec.shape}")
     print(f"Combined vector sample: {combined_vec}")
 
