@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.neighbors import NearestNeighbors
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
+from fuzzywuzzy import fuzz,process
 
 
 def clean_bert_output(text: str) -> str:
@@ -132,7 +133,7 @@ def plot_pca(query_vector, indices, df_scaled_features):
     
     return fig 
 
-def create_radar_chart(vector, title, features, output_dir="output"):
+def create_radar_chart(vector1, vector2, title, features,labels=["Your Song", "Recommendation"], output_dir="output"):
     """Creates a radar chart using the vectors
 
     Splits a circle beetween the amount of angles. 
@@ -148,37 +149,30 @@ def create_radar_chart(vector, title, features, output_dir="output"):
         Nothing, but a chart shows itself with all the vectors
     """
     num_vars = len(features)
-
-    # Create angle slices
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
     angles += angles[:1]
-    
-    if isinstance(vector, np.ndarray):
-        values = vector.tolist()
-    else:
-        values = list(vector)
-
-    values = values + values[:1]  # close the loop
-    
-
-    # Init plot
-    print(f"[DEBUG] angles length: {len(angles)}")
-    print(f"[DEBUG] values length: {len(values)}")
 
     fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
-    ax.plot(angles, values, color="blue", linewidth=2)
-    ax.fill(angles, values, color="blue", alpha=0.25)
-    ax.set_title(title, size=11, pad=20)
 
-    # Set labels
+    # Plot Vector 1 (User's Song)
+    values1 = vector1.tolist() + vector1.tolist()[:1]
+    ax.plot(angles, values1, color="red", linewidth=2, label=labels[0])
+    ax.fill(angles, values1, color="red", alpha=0.25)
+
+    # Plot Vector 2 (Recommended Song)
+    values2 = vector2.tolist() + vector2.tolist()[:1]
+    ax.plot(angles, values2, color="blue", linewidth=2, label=labels[1])
+    ax.fill(angles, values2, color="blue", alpha=0.25)
+
+    ax.set_title(title, size=11, pad=20)
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(features)
     ax.set_yticklabels([])
+    ax.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
 
     # Save to file
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
     filename = f"radar_{slugify(title)}.png"
     filepath = os.path.join(output_dir, filename)
     plt.tight_layout()
@@ -186,6 +180,34 @@ def create_radar_chart(vector, title, features, output_dir="output"):
     plt.close(fig)
 
     return filepath
+
+def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
+    """
+    Finds best song match using fuzzy tring matching.
+    Returns the song (as a series) if a match is found, otherwise None
+    """
+    entities = ner_pipeline(query)
+    song_entity = clean_bert_output(entities.get("song"))
+    artist_entity = clean_bert_output(entities.get('artist'))
+
+    if song_entity and artist_entity:
+        artist_songs = song_df[song_df['Artist(s)'].str.contains(artist_entity, case=False, na=False)]
+        if not artist_songs.empty:
+            match = process.extractOne(song_entity, artist_songs['Song'], scorer=fuzz.ratio)
+            if match and match[1] > 90: 
+                return artist_songs[artist_songs['Song'] == match[0]].iloc[0]
+
+
+    search_query = song_entity if song_entity else query
+
+    best_match = process.extractOne(search_query, song_df['Song'], scorer=fuzz.token_set_ratio)
+
+    if best_match and best_match[1] >= threshold:
+        matched_title = best_match
+        return song_df[song_df['Song'] == matched_title.iloc[0]]
+    
+    return None
+
 
 def find_similar_songs(user_prompt, num_recommendations, ner_pipeline, embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels):    
     """Finds similar songs according to the prompt
@@ -204,68 +226,78 @@ def find_similar_songs(user_prompt, num_recommendations, ner_pipeline, embedder,
     song = clean_bert_output(entities.get("song"))
     artist = clean_bert_output(entities.get("artist"))
     mood = entities.get("mood")
-
+    
     song_match_info = f"Detected Song: **{song if song else 'N/A'}**"
     artist_match_info = f"Detected Artist: **{artist if artist else 'N/A'}**"
     mood_match_info = f"Detected Mood: **{mood if mood else 'N/A'}**"
-
-    print(song_match_info)
-    print(artist_match_info)
-    print(mood_match_info)
-
+    
     song_vec = get_song_vector(song, artist, embedder, df_song_info, song_embeddings, df_scaled_features)
     emotion_vec = get_emotion_vector(mood, embedder, scaled_emotion_means, emotion_labels)
-    assert song_vec.shape == emotion_vec.shape, "Mismatch in feature vector dimensions"
-
     combined_vec = song_vec + emotion_vec
-    print(f"\nQuery vector shape: {combined_vec.shape}")
-    print(f"Combined vector sample: {combined_vec}")
-
-    print("Running KNN with vector shape:", combined_vec.shape)
-    print("Data shape:", df_scaled_features.shape)  
-
+    
     distances, indices = run_knn(combined_vec, df_scaled_features, num_recommendations)
-    print("Distances:", distances)
-    print("Indices:", indices)
     
     top_indices = indices[0]
     top_distances = distances[0]
+    
+    input_song_for_graph = None
+    if song and artist:
+        # Find the specific song from NER to use for the graph's red line
+        ner_matched_song = df_song_info[df_song_info['Song'].str.contains(song, case=False) & df_song_info['Artist(s)'].str.contains(artist, case=False)]
+        if not ner_matched_song.empty:
+            input_song_for_graph = ner_matched_song.iloc[0]
 
-    features = ['Positiveness_T', 'Danceability_T', 'Energy_T', 'Popularity_T', 'Liveness_T', 'Acousticness_T', 'Instrumentalness_T']
-    radar_images = []
-    for idx in top_indices:
-        vec = df_scaled_features.iloc[idx]
-        title = df_song_info.iloc[idx]["Artist(s)"]
-        radar_path = create_radar_chart(vec, title, features)
-        radar_images.append(radar_path)
-
+    features = ['Positiveness', 'Danceability', 'Energy', 'Popularity', 'Liveness', 'Acousticness', 'Instrumentalness']
+    
     main_idx = top_indices[0]
     main_dist = top_distances[0]
     main_song_data = df_song_info.iloc[main_idx]
+    
+    # The blue vector for the chart (the recommended song)
+    main_rec_vector = df_scaled_features.iloc[main_idx].values
+    
+    # The red vector for the chart (the user's song)
+    # If we found the user's song, use its vector. Otherwise, use the combined "vibe" vector.
+    input_graph_vector = df_scaled_features.loc[input_song_for_graph.name].values if input_song_for_graph is not None else combined_vec
+    
+    main_song_radar_path = create_radar_chart(
+        input_graph_vector,
+        main_rec_vector,
+        f"{main_song_data['Song']} vs Your Vibe",
+        features
+    )
 
     main_song = {
         "title": main_song_data['Song'],
         "artist": main_song_data['Artist(s)'],
         "score": 1 - main_dist,
         "album_art": "img/cover_art.jpg",
-        "radar_chart": radar_images[0]
+        "radar_chart": main_song_radar_path
     }
 
     similar_songs = []
     for i, (idx, dist) in enumerate(zip(top_indices[1:], top_distances[1:])):
-        song = df_song_info.iloc[idx]
+        song_data = df_song_info.iloc[idx]
+        rec_vector = df_scaled_features.iloc[idx].values
+        
+        radar_path = create_radar_chart(
+            input_graph_vector,
+            rec_vector,
+            f"{song_data['Song']} vs Your Vibe",
+            features
+        )
         similar_songs.append({
-            "title": song['Song'],
-            "artist": song['Artist(s)'],
+            "title": song_data['Song'],
+            "artist": song_data['Artist(s)'],
             "score": 1 - dist,
             "album_art": "img/cover_art.jpg",
-            "radar_chart": radar_images[i + 1] 
+            "radar_chart": radar_path
         })
-
+        
     return {
         "main_song": main_song,
         "similar_songs": similar_songs,
-        "song_match_info":song_match_info,
+        "song_match_info": song_match_info,
         "artist_match_info": artist_match_info,
         "mood_match_info": mood_match_info
     }
