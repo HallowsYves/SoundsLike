@@ -1,5 +1,6 @@
 import os
 import re
+import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,8 +19,9 @@ df_song_info = load_data("data/song_data.csv", index=True)
 song_embed = np.load("data/song_embeddings.npy")
 song_embeddings = normalize(song_embed)
 scaled_emotion_means = np.load("data/scaled_emotion_means.npy")
-with open("data/emotion_labels.txt", "r") as f:
-    emotion_labels = [line.strip() for line in f.readlines()]
+scaled_emotions = np.load("data/emotion_vectors.npy")
+with open("data/emotion_labels.json", "r") as f:
+    emotion_labels = json.load(f)
 
 assert df_song_info.index.equals(df_scaled_features.index), "Index mismatch!"
 assert len(df_song_info) == len(song_embeddings), "Mismatch in song info and embeddings"
@@ -96,9 +98,9 @@ def get_emotion_vector(mood):
         sims = cosine_similarity([mood_embedding], label_embeddings)[0]
         idx = np.argmax(sims)
         print(f"Mapped '{mood}' to closest emotion: {emotion_labels[idx]} (cos sim: {sims[idx]:.3f})")
-        return scaled_emotion_means[idx]
+        return scaled_emotions[idx]
     print("No mood provided, using neutral vector.")
-    return np.zeros(scaled_emotion_means.shape[1])
+    return np.zeros(scaled_emotions.shape[1])
 
 def run_knn(query_vector, k=5):
     """Setting up a K Nearest Neighbors graph
