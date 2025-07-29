@@ -183,18 +183,29 @@ def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "
     fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
 
     values1 = vector1.tolist() + vector1.tolist()[:1]
-    ax.plot(angles, values1, color="red", linewidth=2, label=labels[0])
-    ax.fill(angles, values1, color="red", alpha=0.25)
-
     values2 = vector2.tolist() + vector2.tolist()[:1]
-    ax.plot(angles, values2, color="blue", linewidth=2, label=labels[1])
-    ax.fill(angles, values2, color="blue", alpha=0.25)
 
-    ax.set_title(title, size=11, pad=20)
+    fig, ax = plt.subplots(figsize=(6,6), subplot_kw=dict(polar=True))
+    fig.patch.set_facecolor("#f9f9f9")
+    ax.set_facecolor("#f0f0f0")
+
+
+    ax.plot(angles, values1, color="#dda15e", linewidth=2, label=labels[0])
+    ax.fill(angles, values1, color="#dda15e", alpha=0.4, zorder=1)
+
+    ax.plot(angles, values2, color="#669bbc", linewidth=2, label=labels[1])
+    ax.fill(angles, values2, color="#669bbc", alpha=0.4, zorder=2)
+
+    ax.set_title(title, size=15, pad=30, weight="bold")
+
+    # Feature labels
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(features)
+    ax.set_xticklabels(features, size=11, weight='medium')
     ax.set_yticklabels([])
     ax.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+
+    ax.spines['polar'].set_visible(False)
+    ax.grid(color='gray', linestyle='dashed', linewidth=0.6, alpha=0.6)
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
