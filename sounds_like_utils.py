@@ -9,17 +9,19 @@ from sklearn.metrics.pairwise import cosine_similarity
 from fuzzywuzzy import fuzz,process
 
 
-def clean_bert_output(text: str) -> str:
-    """Cleans bert text
+def clean_bert_output(text: str) -> str:  
+    """
+    Cleans bert text output.
 
     Removes anything between [] because of [CLS] in tokens.
     Adds words together the are taken apart using 
-    WordPiece tokenization, which start with ##
+    WordPiece tokenization, which start with ##.
 
     Arg:
-        text: tokenized text from NER pipeline
+        text (str): Tokenized text from NER pipeline.
+
     Returns:
-        Clean text with no past token marks
+        str: Clean text with no past token marks and subwords merged.
     """
     if not text:
         return ""
@@ -34,17 +36,24 @@ def clean_bert_output(text: str) -> str:
     return " ".join(cleaned)
 
 def get_song_vector(song_name, artist_name, embedder, df_song_info, song_embeddings, df_scaled_features):
-    """Finds the inputs closest song vector
+    """
+    Finds the inputs closest song vector.
 
     Creates an embedded query based on song and/or artist.
     Find's the closest match using cosine and grabs the index.
     The index is used on the song database to get its vector.
 
     Args:
-        song_name: a string that is a song
-        artist_name: a string that is an artist
+        song_name (str): The name of the song used for embedding to find the closest vector match.
+        artist_name (str): The name of the artist used for embedding to find the closest vector match.
+        embedder (SentenceTransformer): The model chosen to embed.
+        df_song_info (pd.DataFrame): Composed of all the songs and artists in the dataset. Matched indexes with df_scaled_features.
+        song_embeddings (np.ndarray): Contains the embedded combinations of all the artist and songs.
+        df_scaled_features (pd.DataFrame): Composed of all the features in the dataset. Matched indexes with df_song_info.
+    
     Returns:
-        A vector made up of the chosen features
+        np.ndarray: A vector containing feature values to the best matched song, 
+                    or a zero vector if no song or artist was provided.
     """
     if song_name or artist_name:
         query = f"{song_name} by {artist_name}" if song_name and artist_name else song_name or artist_name
@@ -63,16 +72,22 @@ def get_song_vector(song_name, artist_name, embedder, df_song_info, song_embeddi
     return np.zeros(df_scaled_features.shape[1])
 
 def get_emotion_vector(mood, embedder, scaled_emotion_means, emotion_labels):
-    """Finds the inputs closest emotion vector
+    """
+    Finds the inputs closest emotion vector.
     
     Embeds the mood and labels, normalizing their vectors.
     Find's the closest match using cosine and grabs the index.
     The index is used on the emotion database to get its vector.
 
     Args:
-        mood: a string that is an emotion
+        mood (str): The mood identified from the user's prompt.
+        embedder (SentenceTransformer): The model chosen to embed.
+        scaled_emotion_means (np.ndarray): An array mapping anchored song indexes to emotions.
+        emotion_labels (List[str]): All the sub-emotions to compare to.
+
     Returns:
-        A vector made up of the chosen features
+        np.ndarray: The vector features of the song mapped to the emotion, 
+                    or a zero vector if no mood was provided.
     """
     if mood:
         mood_embedding = embedder.encode(mood, normalize_embeddings=True)
@@ -86,17 +101,22 @@ def get_emotion_vector(mood, embedder, scaled_emotion_means, emotion_labels):
     return np.zeros(scaled_emotion_means.shape[1])
 
 def run_knn(query_vector, df_scaled_features, k=5):
-    """Setting up a K Nearest Neighbors graph
+    """
+    Finds the nearest neigbhors of a query vector using KNN.
 
     Define how many neighbors you want back, then plot 
     all the points onto the graph. A query is used 
     define the central point and those around.
 
     Args:
-        query_vector: a vector consisting of the features used to fit
-        k: the amount of indices to be returned
+        query_vector (np.ndarray): A vector consisting of the features used as the query point.
+        df_scaled_features (pd.DataFrame): Composed of all the features in the dataset, used to fit the model.
+        k (int, optional): The amount of neighbors to be returned (default = 5).
+
     Returns:
-        The indices of the closest points to the query plot
+        Tuple[np.ndarray, np.ndarray]: contains 2 arrays:
+            - distances: The distances to each of the neighbors.
+            - indices: The indicies to the neigbors in the dataset.
     """
     knn = NearestNeighbors(n_neighbors=k + 1)
     knn.fit(df_scaled_features)
@@ -104,24 +124,27 @@ def run_knn(query_vector, df_scaled_features, k=5):
     return distances, indices
 
 def plot_pca(query_vector, indices, df_scaled_features):
-    """Visualises a 2D plot for the query and indicies
+    """
+    Visualises a 2D plot for the query and indicies
 
     Uses Principal Component Analysis to turn all the
     vectors into 2D. It has 3 different targets: background (gray),
     query (red), and neighbor (green) points. 
 
     Args:
-        query_vector: a vector consisting of the features used to plot
-        indicies: the closest vectors to the query_vector
+        query_vector (np.ndarray): A vector consisting of the features used to plot.
+        indicies (np.ndarray): The closest vectors to the query_vector.
+        df_scaled_features (pandas.Dataframe): Composed of all the features in the dataset, used to fit the graph.
+
     Returns:
-        Nothing, but a plot does pop out with the points marked 
+        matplotlib.figure.Figure: A figure containing the PCA plot.
     """
     pca = PCA(n_components=2)
     pca_result = pca.fit_transform(df_scaled_features)
     test_2D = pca.transform([query_vector])
     neighbors_2D = pca_result[indices[0]]
 
-    fig, ax = plt.subplots(figsize=(10, 6)) # Create figure and axes
+    fig, ax = plt.subplots(figsize=(10, 6))
     ax.scatter(pca_result[:, 0], pca_result[:, 1], alpha=0.2, label='All Songs', color='gray')
     ax.scatter(neighbors_2D[:, 0], neighbors_2D[:, 1], alpha=0.2, s=100, label='Nearest Neighbors', color='green')
     ax.scatter(test_2D[:, 0], test_2D[:, 1], alpha=0.2, label='Your Prompt', color='red')
@@ -134,20 +157,24 @@ def plot_pca(query_vector, indices, df_scaled_features):
     
     return fig 
 
-def create_radar_chart(vector1, vector2, title, features,labels=["Your Song", "Recommendation"], output_dir="output"):
-    """Creates a radar chart using the vectors
+def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "Recommendation"], output_dir="output"):
+    """
+    Creates a radar chart comparison between 2 vectors.
 
     Splits a circle beetween the amount of angles. 
     Assigns labels to vectors, which are then graphed
     according to their features.
 
     Args:
-        vectors: the numbers used to chart it
-        labels: the song names to each chart
-        features: the labels for the xtick
-        song_name: used for the title
+        vector1 (np.ndarray): The comparison song's vector features.
+        vector2 (np.ndarray): The main song's vector features.
+        title (str): The main song's name.
+        features (List[str]): The features to label .
+        labels (List[str]): The song names to each chart.
+        output_dir (str, optional): Where the file should save (default = "output").
+
     Returns:
-        Nothing, but a chart shows itself with all the vectors
+        str: The full file path to the saved radar chart image.
     """
     num_vars = len(features)
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
@@ -155,12 +182,10 @@ def create_radar_chart(vector1, vector2, title, features,labels=["Your Song", "R
 
     fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
 
-    # Plot Vector 1 (User's Song)
     values1 = vector1.tolist() + vector1.tolist()[:1]
     ax.plot(angles, values1, color="red", linewidth=2, label=labels[0])
     ax.fill(angles, values1, color="red", alpha=0.25)
 
-    # Plot Vector 2 (Recommended Song)
     values2 = vector2.tolist() + vector2.tolist()[:1]
     ax.plot(angles, values2, color="blue", linewidth=2, label=labels[1])
     ax.fill(angles, values2, color="blue", alpha=0.25)
@@ -171,7 +196,6 @@ def create_radar_chart(vector1, vector2, title, features,labels=["Your Song", "R
     ax.set_yticklabels([])
     ax.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
 
-    # Save to file
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     filename = f"radar_{slugify(title)}.png"
@@ -186,6 +210,15 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
     """
     Finds best song match using fuzzy tring matching.
     Returns the song (as a series) if a match is found, otherwise None
+
+    Args:
+        query:
+        song_df:
+        ner_pipeline:
+        threshold (int, optional):
+    
+    Returns:
+        bool: 
     """
     entities = ner_pipeline(query)
     song_entity = clean_bert_output(entities.get("song"))
@@ -219,7 +252,16 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
 
     Args:
         user_prompt: an input that details mood, song, and/or artist
+        input_song:
         num_recommendations: the amount of songs the user wants
+        ner_pipeline:
+        embedder:
+        df_scaled_features:
+        df_song_info:
+        song_embeddings:
+        scaled_emotion_means:
+        emotion_labels:
+        
     Returns:
         Nothing, just terminal prints and matplot plots
     """
