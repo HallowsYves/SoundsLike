@@ -228,6 +228,14 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
     artist_entity = clean_bert_output(entities.get("artist"))
     mood_entity = entities.get("mood")
 
+    song_match_info = f"Detected Song: **{song_entity if song_entity else 'N/A'}**"
+    artist_match_info = f"Detected Artist: **{artist_entity if artist_entity else 'N/A'}**"
+    mood_match_info = f"Detected Mood: **{mood_entity if mood_entity else 'N/A'}**"
+
+    print(song_match_info)
+    print(artist_match_info)
+    print(mood_match_info)
+    
     song_for_vec = input_song['Song'] if input_song is not None else song_entity
     artist_for_vec = input_song['Artist(s)'] if input_song is not None else artist_entity
     
