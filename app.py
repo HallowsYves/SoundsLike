@@ -1,4 +1,5 @@
 import streamlit as st
+import json
 from sounds_like_utils import find_similar_songs
 from ner.model.pipeline_ner import ner_pipeline
 from data_utils import load_data
@@ -14,10 +15,10 @@ def load_model_and_data():
     df_song_info = load_data("data/song_data.csv", index=True)
     song_embed = np.load("data/song_embeddings.npy")
     song_embeddings = normalize(song_embed)
-    scaled_emotion_means = np.load("data/scaled_emotion_means.npy")
-    with open("data/emotion_labels.txt", "r") as file:
-        emotion_labels = [line.strip() for line in file.readlines()]
-    return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels
+    scaled_emotions = np.load("data/emotion_vectors.npy")
+    with open("data/emotion_labels.json", "r") as f:
+        emotion_labels = json.load(f)
+    return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotions, emotion_labels
 
 # App Setup
 st.set_page_config(page_title="Playlist Prompter", layout="wide")
@@ -25,7 +26,7 @@ st.title("🎵 Playlist Prompter")
 st.caption("Generate music recommendations from natural language prompts like *'sad songs like Moon by Kanye West'*")
 
 # Load everything
-embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels = load_model_and_data()
+embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotions, emotion_labels = load_model_and_data()
 
 # Prompt Input
 with st.container():
@@ -42,7 +43,7 @@ with st.container():
             df_scaled_features=df_scaled_features,
             df_song_info=df_song_info,
             song_embeddings=song_embeddings,
-            scaled_emotion_means=scaled_emotion_means,
+            scaled_emotion_means=scaled_emotions,
             emotion_labels=emotion_labels
         )
 

@@ -61,7 +61,7 @@ def get_song_vector(song_name, artist_name, embedder, df_song_info, song_embeddi
     print("No song or artist provided, using fallback vector.")
     return np.zeros(df_scaled_features.shape[1])
 
-def get_emotion_vector(mood, embedder, scaled_emotion_means, emotion_labels):
+def get_emotion_vector(mood, embedder, scaled_emotions, emotion_labels):
     """Finds the inputs closest emotion vector
     
     Embeds the mood and labels, normalizing their vectors.
@@ -79,9 +79,10 @@ def get_emotion_vector(mood, embedder, scaled_emotion_means, emotion_labels):
         sims = cosine_similarity([mood_embedding], label_embeddings)[0]
         idx = np.argmax(sims)
         print(f"Mapped '{mood}' to closest emotion: {emotion_labels[idx]}")
-        return scaled_emotion_means[idx]
+        print(f"Mood Vector: {scaled_emotions[idx]}")
+        return scaled_emotions[idx]
     print("No mood provided, using neutral vector.")
-    return np.zeros(scaled_emotion_means.shape[1])
+    return np.zeros(scaled_emotions.shape[1])
 
 def run_knn(query_vector, df_scaled_features, k=5):
     """Setting up a K Nearest Neighbors graph
@@ -217,7 +218,13 @@ def find_similar_songs(user_prompt, num_recommendations, ner_pipeline, embedder,
     emotion_vec = get_emotion_vector(mood, embedder, scaled_emotion_means, emotion_labels)
     assert song_vec.shape == emotion_vec.shape, "Mismatch in feature vector dimensions"
 
-    combined_vec = song_vec + emotion_vec
+    if np.all(song_vec == 0):
+        combined_vec = emotion_vec
+    elif np.all(emotion_vec == 0):
+        combined_vec = song_vec
+    else:
+        combined_vec = (song_vec * .7 ) + (emotion_vec *.3)
+        
     print(f"\nQuery vector shape: {combined_vec.shape}")
     print(f"Combined vector sample: {combined_vec}")
 
