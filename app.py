@@ -81,8 +81,8 @@ with st.container():
             st.markdown("---")
             st.markdown("### 🎯 Closest Match")
             col1, col2 = st.columns([1, 3])
-            with col1:
-                st.image(main_song["album_art"], width=140)
+            #with col1:
+                #st.image(main_song["album_art"], width=140)
             with col2:
                 st.markdown(f"**{main_song['title']}** by **{main_song['artist']}**")
                 st.markdown(f"**Score**: {main_song['score']:.2f}")
@@ -93,8 +93,8 @@ with st.container():
             st.markdown("### 🎶 Recommended Songs")
             for rec in recs:
                 col1, col2 = st.columns([1, 3])
-                with col1:
-                    st.image(rec["album_art"], width=100)
+                #with col1:
+                    #st.image(rec["album_art"], width=100)
                 with col2:
                     st.markdown(f"**{rec['title']}** by **{rec['artist']}**")
                     st.markdown(f"**Score**: {rec['score']:.2f}")

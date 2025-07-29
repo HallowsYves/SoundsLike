@@ -314,7 +314,6 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
         "title": main_song_data['Song'],
         "artist": main_song_data['Artist(s)'],
         "score": 1.0 if input_song is not None else (1 - distances[0][0]),
-        "album_art": "img/cover_art.jpg",
         "radar_chart": main_song_radar_path
     }
 
@@ -335,7 +334,6 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
             "title": rec_song_data['Song'],
             "artist": rec_song_data['Artist(s)'],
             "score": 1 - distances[0][np.where(top_indices == idx)[0][0]],
-            "album_art": "img/cover_art.jpg",
             "radar_chart": radar_path
         })
         
