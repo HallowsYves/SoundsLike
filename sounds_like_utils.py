@@ -80,6 +80,7 @@ def get_emotion_vector(mood, embedder, scaled_emotion_means, emotion_labels):
         sims = cosine_similarity([mood_embedding], label_embeddings)[0]
         idx = np.argmax(sims)
         print(f"Mapped '{mood}' to closest emotion: {emotion_labels[idx]}")
+        print(f"Mood Vector: {scaled_emotion_means[idx]}")
         return scaled_emotion_means[idx]
     print("No mood provided, using neutral vector.")
     return np.zeros(scaled_emotion_means.shape[1])
@@ -232,7 +233,16 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
     
     song_vec = get_song_vector(song_for_vec, artist_for_vec, embedder, df_song_info, song_embeddings, df_scaled_features)
     emotion_vec = get_emotion_vector(mood_entity, embedder, scaled_emotion_means, emotion_labels)
-    combined_vec = song_vec + emotion_vec
+    
+    if np.all(song_vec == 0):
+        combined_vec = emotion_vec
+        print("combine = emotion")
+    elif np.all(emotion_vec == 0):
+        combined_vec = song_vec
+        print("combine = song")
+    else:
+        combined_vec = (song_vec * .7 ) + (emotion_vec *.3)
+        print("combine = both")
     
     distances, indices = run_knn(combined_vec, df_scaled_features, num_recommendations + 1)
     top_indices = indices[0]

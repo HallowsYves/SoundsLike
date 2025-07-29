@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import json
 from sounds_like_utils import find_similar_songs, find_song_with_fuzzy_matching
 from ner.model.pipeline_ner import ner_pipeline
 from data_utils import load_data
@@ -16,9 +17,9 @@ def load_model_and_data():
     df_song_info = load_data("data/song_data.csv", index=True)
     song_embed = np.load("data/song_embeddings.npy")
     song_embeddings = normalize(song_embed)
-    scaled_emotion_means = np.load("data/scaled_emotion_means.npy")
-    with open("data/emotion_labels.txt", "r") as file:
-        emotion_labels = [line.strip() for line in file.readlines()]
+    scaled_emotion_means = np.load("data/emotion_vectors.npy")
+    with open("data/emotion_labels.json", "r") as f:
+        emotion_labels = json.load(f)
     return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels
 
 # App Setup
