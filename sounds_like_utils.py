@@ -238,8 +238,12 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
     if song_entity and artist_entity:
         artist_songs = song_df[song_df['Artist(s)'].str.contains(artist_entity, case=False, na=False)]
         if not artist_songs.empty:
-            match = process.extractOne(song_entity, artist_songs['Song'], scorer=fuzz.ratio)
-            if match and match[1] > 90: 
+            match = process.extractOne(
+                song_entity,
+                artist_songs['Song'],
+                scorer=fuzz.token_sort_ratio
+            )
+            if match and match[1] > 90 and match[0].lower() == song_entity.lower(): 
                 return artist_songs[artist_songs['Song'] == match[0]].iloc[0]
 
 
@@ -249,8 +253,7 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
 
     if best_match and best_match[1] >= threshold:
         matched_title = best_match
-        return song_df['Song'] == matched_title[0]
-    
+        return song_df[song_df['Song'] == matched_title[0]].iloc[0]    
     return None
 
 
