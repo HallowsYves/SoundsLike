@@ -17,3 +17,5 @@ data/numeric_data.csv
 data/spotify_dataset.csv
 
 output/
+
+.env

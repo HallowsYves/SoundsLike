@@ -157,6 +157,12 @@ def plot_pca(query_vector, indices, df_scaled_features):
     
     return fig 
 
+def escape_latex_chars(s):
+    """
+    Escapes characters that could be misinterpreted by Matplotlib's mathtext engine.
+    """
+    return re.sub(r'([$%#&{}_])', r'\\\1', s)
+
 def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "Recommendation"], output_dir="output"):
     """
     Creates a radar chart comparison between 2 vectors.
@@ -183,18 +189,30 @@ def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "
     fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
 
     values1 = vector1.tolist() + vector1.tolist()[:1]
-    ax.plot(angles, values1, color="red", linewidth=2, label=labels[0])
-    ax.fill(angles, values1, color="red", alpha=0.25)
-
     values2 = vector2.tolist() + vector2.tolist()[:1]
-    ax.plot(angles, values2, color="blue", linewidth=2, label=labels[1])
-    ax.fill(angles, values2, color="blue", alpha=0.25)
 
-    ax.set_title(title, size=11, pad=20)
+    fig, ax = plt.subplots(figsize=(6,6), subplot_kw=dict(polar=True))
+    fig.patch.set_facecolor("#f9f9f9")
+    ax.set_facecolor("#f0f0f0")
+
+
+    ax.plot(angles, values1, color="#dda15e", linewidth=2, label=labels[0])
+    ax.fill(angles, values1, color="#dda15e", alpha=0.4, zorder=1)
+
+    ax.plot(angles, values2, color="#669bbc", linewidth=2, label=labels[1])
+    ax.fill(angles, values2, color="#669bbc", alpha=0.4, zorder=2)
+
+    safe_title = escape_latex_chars(title)
+    ax.set_title(safe_title, size=15, pad=30, weight="bold")
+    
+    # Feature labels
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(features)
+    ax.set_xticklabels(features, size=11, weight='medium')
     ax.set_yticklabels([])
     ax.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+
+    ax.spines['polar'].set_visible(False)
+    ax.grid(color='gray', linestyle='dashed', linewidth=0.6, alpha=0.6)
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -206,41 +224,75 @@ def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "
 
     return filepath
 
+
+def normalize(text):
+    return text.lower().strip().replace("’", "'").replace("`", "'")
+
+
+def extract_song_artist_from_prompt(prompt):
+    """
+    Extracts phrases like '2031 by Inner Wave' from prompts like
+    'sad songs like 2031 by Inner Wave'
+    """
+    match = re.search(r"(?:like\s+)(.+?)\s+by\s+(.+)", prompt, re.IGNORECASE)
+    if match:
+        return match.group(1).strip(), match.group(2).strip()
+    return None, None
+
+
 def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
     """
-    Finds best song match using fuzzy tring matching.
-    Returns the song (as a series) if a match is found, otherwise None
-
-    Args:
-        query:
-        song_df:
-        ner_pipeline:
-        threshold (int, optional):
-    
-    Returns:
-        bool: 
+    Attempts to match song and artist using regex, NER, and fuzzy matching.
+    Returns the best-matched row from the song_df or None.
     """
-    entities = ner_pipeline(query)
-    song_entity = clean_bert_output(entities.get("song"))
-    artist_entity = clean_bert_output(entities.get('artist'))
+    #  Try regex override 
+    structured_song, structured_artist = extract_song_artist_from_prompt(query)
+
+    if structured_song and structured_artist:
+        print(f"[Regex Extracted] Song: {structured_song} | Artist: {structured_artist}")
+        song_entity = structured_song
+        artist_entity = structured_artist
+    else:
+        # Fallback to NER
+        entities = ner_pipeline(query)
+        song_entity = clean_bert_output(entities.get("song"))
+        artist_entity = clean_bert_output(entities.get("artist"))
+
+    song_entity = normalize(song_entity) if song_entity else ""
+    artist_entity = normalize(artist_entity) if artist_entity else ""
+    song_df['Song'] = song_df['Song'].str.lower().str.strip()
+    song_df['Artist(s)'] = song_df['Artist(s)'].str.lower().str.strip()
+
+    # Step 4: Known problem artists override
+    KNOWN_ARTISTS = ["tv girl", "inner wave", "the 1975"]
+    for known in KNOWN_ARTISTS:
+        if known in normalize(query):
+            artist_entity = known
+            break
+
+    if song_entity and artist_entity and song_entity in artist_entity:
+        print(f"[Heuristic] Ignoring song '{song_entity}' embedded in artist '{artist_entity}'")
+        song_entity = ""
 
     if song_entity and artist_entity:
         artist_songs = song_df[song_df['Artist(s)'].str.contains(artist_entity, case=False, na=False)]
         if not artist_songs.empty:
-            match = process.extractOne(song_entity, artist_songs['Song'], scorer=fuzz.ratio)
-            if match and match[1] > 90: 
+            match = process.extractOne(
+                song_entity,
+                artist_songs['Song'],
+                scorer=fuzz.token_sort_ratio
+            )
+            if match and match[1] > 90 and normalize(match[0]) == song_entity:
                 return artist_songs[artist_songs['Song'] == match[0]].iloc[0]
 
-
     search_query = song_entity if song_entity else query
-
     best_match = process.extractOne(search_query, song_df['Song'], scorer=fuzz.token_set_ratio)
 
     if best_match and best_match[1] >= threshold:
-        matched_title = best_match
-        return song_df['Song'] == matched_title[0]
-    
+        return song_df[song_df['Song'] == best_match[0]].iloc[0]
+
     return None
+
 
 
 def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipeline, embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels):    
@@ -266,13 +318,21 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
         Nothing, just terminal prints and matplot plots
     """
     entities = ner_pipeline(user_prompt)
-    song_entity = clean_bert_output(entities.get("song"))
-    artist_entity = clean_bert_output(entities.get("artist"))
     mood_entity = entities.get("mood")
+    
+    if input_song is not None:
+        song_entity = input_song['Song']
+        artist_entity = input_song['Artist(s)']
+        print(f"[USING FUZZY MATCH] Song: {song_entity}, Artist: {artist_entity}")
+    else:
+        song_entity = clean_bert_output(entities.get("song"))
+        artist_entity = clean_bert_output(entities.get("artist"))
 
+    # Entity display
     song_match_info = f"Detected Song: **{song_entity if song_entity else 'N/A'}**"
     artist_match_info = f"Detected Artist: **{artist_entity if artist_entity else 'N/A'}**"
     mood_match_info = f"Detected Mood: **{mood_entity if mood_entity else 'N/A'}**"
+
 
     print(song_match_info)
     print(artist_match_info)
@@ -282,8 +342,12 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
     artist_for_vec = input_song['Artist(s)'] if input_song is not None else artist_entity
     
     song_vec = get_song_vector(song_for_vec, artist_for_vec, embedder, df_song_info, song_embeddings, df_scaled_features)
-    emotion_vec = get_emotion_vector(mood_entity, embedder, scaled_emotion_means, emotion_labels)
-    
+    if mood_entity is not None and isinstance(mood_entity, str) and mood_entity.strip():
+        emotion_vec = get_emotion_vector(mood_entity, embedder, scaled_emotion_means, emotion_labels)
+    else:
+        print("No mood provided, using neutral vector.")
+        emotion_vec = np.zeros(scaled_emotion_means.shape[1])
+
     if np.all(song_vec == 0):
         combined_vec = emotion_vec
         print("combine = emotion")
@@ -314,7 +378,6 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
         "title": main_song_data['Song'],
         "artist": main_song_data['Artist(s)'],
         "score": 1.0 if input_song is not None else (1 - distances[0][0]),
-        "album_art": "img/cover_art.jpg",
         "radar_chart": main_song_radar_path
     }
 
@@ -335,10 +398,10 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
             "title": rec_song_data['Song'],
             "artist": rec_song_data['Artist(s)'],
             "score": 1 - distances[0][np.where(top_indices == idx)[0][0]],
-            "album_art": "img/cover_art.jpg",
             "radar_chart": radar_path
         })
         
+        print(similar_songs)
         if len(similar_songs) == num_recommendations:
             break
             
