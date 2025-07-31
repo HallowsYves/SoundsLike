@@ -229,7 +229,14 @@ def normalize(text):
 def extract_song_artist_from_prompt(prompt):
     """
     Extracts phrases like '2031 by Inner Wave' from prompts like
-    'sad songs like 2031 by Inner Wave'
+    'sad songs like 2031 by Inner Wave'.
+
+    Args:
+        prompt (str): The full prompt from the user
+    
+    Returns:
+        str: 2 groups, one with the song name, the other with artist name,
+             or none if no match is empty.
     """
     match = re.search(r"(?:like\s+)(.+?)\s+by\s+(.+)", prompt, re.IGNORECASE)
     if match:
@@ -241,7 +248,20 @@ def extract_song_artist_from_prompt(prompt):
 def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
     """
     Attempts to match song and artist using regex, NER, and fuzzy matching.
-    Returns the best-matched row from the song_df or None.
+    
+    Using regex, it tries to get the artist and song. If it fails, it uses the NER
+    model as a fallback. It has some cases against known errors. Finally it uses 
+    fuzzy matching of the song/artist against the song dataframe.
+
+    Args:
+        query (str): The input string from the user
+        song_df (pandas.Dataframe): Composed of all the songs and artists in the dataset.
+        ner_pipeline (Callable): The NER pipeline that extracts "song" and "artist" from the query.
+        threshold (int, optional): The minimum matching score for fuzzy (default = 85).
+    
+    Returns:
+        pd.Series: A row from the song_df that best matches the query, 
+                   or None if no match is found.
     """
     #  Try regex override 
     structured_song, structured_artist = extract_song_artist_from_prompt(query)
@@ -294,26 +314,32 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
 
 
 def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipeline, embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels):    
-    """Finds similar songs according to the prompt
+    """
+    Finds similar songs according to the prompt
 
-    Uses the NER pipeline to decipher the entities in the prompt.
-    Finds the vectors for each of them, combines them, and runs
-    it through KNN to get the most similar songs.
+    Uses the song, artist, and/or mood entities from either fuzzy matching or NER as points.
+    It gets the vector points for the entities, combining them and inserting it into KNN.
+    Gathers each similar song's information: song/artist, similarity score, and radar_charts.
 
     Args:
-        user_prompt: an input that details mood, song, and/or artist
-        input_song:
-        num_recommendations: the amount of songs the user wants
-        ner_pipeline:
-        embedder:
-        df_scaled_features:
-        df_song_info:
-        song_embeddings:
-        scaled_emotion_means:
-        emotion_labels:
+        user_prompt (str): An input that details mood, song, and/or artist.
+        input_song (pd.Series): A matched song row if Fuzzy was successful.
+        num_recommendations (int): The amount of songs the user wants.
+        ner_pipeline (Callable): A named entity recognition model which identifies song, artist, and mood.
+        embedder (SentenceTransformer): The model chosen to embed.
+        df_scaled_features (pd.DataFrame): Scaled song features used in similarity calculations.
+        df_song_info (pd.DataFrame): Raw song metadata including titles and artist names.
+        song_embeddings (np.ndarray): Embedded representations of all songs in the dataset.
+        scaled_emotion_means (np.ndarray): Pre-computed emotion vectors for reference moods.
+        emotion_labels (List[str]): List of emotion label strings used to match moods.
         
     Returns:
-        Nothing, just terminal prints and matplot plots
+        Dict[str, Any]: A dictionary with:
+            - 'main_song': dict with title, artist, similarity score, radar chart path
+            - 'similar_songs': list of dicts with title, artist, score, radar chart path
+            - 'song_match_info': formatted string for display
+            - 'artist_match_info': formatted string for display
+            - 'mood_match_info': formatted string for display
     """
     entities = ner_pipeline(user_prompt)
     mood_entity = entities.get("mood")
