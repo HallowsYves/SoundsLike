@@ -9,6 +9,8 @@ from sklearn.preprocessing import normalize
 from spotipy_util import init_spotify, get_spotify_track
 
 
+
+
 # Load models and data once
 @st.cache_resource
 def load_model_and_data():
@@ -23,31 +25,34 @@ def load_model_and_data():
     return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels
 
 
+
+
 # App Setup
 spotify = init_spotify()
 st.set_page_config(page_title="SoundsLike", layout="wide")
 st.title("🎵 SoundsLike: Music Recommendation Engine")
 st.caption("Generate music recommendations from natural language prompts like *'sad songs like Moon by Kanye West'*")
 
+
 # Load everything
 embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels = load_model_and_data()
+
 
 # Prompt Input
 with st.container():
     st.subheader("💬 Enter Your Prompt")
     user_prompt = st.text_input("What vibe are you going for?", placeholder="e.g. sad songs like Moon by Kanye West")
     num_recs = st.slider("Number of recommendations", min_value=3, max_value=10, value=5)
-    print(f"Test 1: User Prompt: {user_prompt}")
+
 
     if st.button("🔍 Find Songs") and user_prompt.strip():
-        
+       
         # Attempt Fuzzy Matching
-        print(f"Test 2: User Prompt: {user_prompt}")
-        exact_match = find_song_with_fuzzy_matching(user_prompt, df_song_info, ner_pipeline)
+        exact_match, closest_match  = find_song_with_fuzzy_matching(user_prompt, df_song_info, ner_pipeline)
         prompt_for_engine = user_prompt
-        print(f"Test 3: User Prompt: {user_prompt}")
 
-        if exact_match is not None:
+
+        if exact_match is not None and closest_match is True:
             print(f"[DEBUG] exact_match type: {type(exact_match)}")
             print(f"[DEBUG] exact_match contents:\n{exact_match}")
             matched_title = exact_match['Song']
@@ -56,8 +61,9 @@ with st.container():
         else:
             st.info("No exact title found. searching by vibe...")
 
-        print(f"Test 4: User Prompt: {user_prompt}")
-        print(f"Test 5: User Prompt/Prompt for engine: {prompt_for_engine}")
+
+        print(f"User Prompt: {user_prompt}")
+        print(f"Prompt for Engine: {prompt_for_engine}")
         result = find_similar_songs(
             user_prompt=user_prompt,
             input_song=exact_match,
@@ -71,11 +77,14 @@ with st.container():
             emotion_labels=emotion_labels
         )
 
+
         if result:
             main_song = result["main_song"]
             recs = result["similar_songs"]
 
+
             recs = [main_song] + recs
+
 
             # Detected Entities
             st.markdown("### 🧠 Detected Entities")
@@ -84,11 +93,14 @@ with st.container():
             st.markdown(f"- {result['mood_match_info']}")
 
 
+
+
             # Recommended Songs
             st.markdown("---")
             st.markdown("### 🎶 Recommended Songs")
         for rec in recs:
             track = get_spotify_track(spotify, rec['title'], rec['artist'])
+
 
             if track:
                 album_img = track["album"]["images"][0]["url"]
@@ -101,13 +113,16 @@ with st.container():
                 track_name = rec["title"]
                 artist_name = rec["artist"]
 
+
             col_art, col_info = st.columns([1, 4])
+
 
             with col_art:
                 if album_img:
                     st.image(album_img, width=200)
                 else:
                     st.markdown("🎵 (no cover)")
+
 
             with col_info:
                 st.markdown(
@@ -135,7 +150,12 @@ with st.container():
                 )
                 st.markdown(f"**Score:** {rec['score']:.2f}")
 
+
                 with st.expander("See how your song compares"):
                     st.image(rec["radar_chart"], use_container_width=True)
 
+
             st.markdown("---")
+
+
+
