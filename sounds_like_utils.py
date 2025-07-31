@@ -184,9 +184,6 @@ def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "
         str: The full file path to the saved radar chart image.
     """
 
-    def escape_latex_chars(text):
-        return text.replace("_", r"\_")
-
     num_vars = len(features)
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
     angles += angles[:1]
@@ -195,32 +192,22 @@ def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "
     values2 = vector2.tolist() + vector2.tolist()[:1]
 
     fig, ax = plt.subplots(figsize=(4.5, 4.5), subplot_kw=dict(polar=True))
-
-    # Dark background setup
-    fig.patch.set_facecolor("#121212")  # Spotify dark
+  
+    fig.patch.set_facecolor("#121212") 
     ax.set_facecolor("#121212")
-
-    # Plot comparison (light gray)
+  
     ax.plot(angles, values1, color="#CCCCCC", linewidth=1.5, label=labels[1])
     ax.fill(angles, values1, color="#CCCCCC", alpha=0.25, zorder=1)
-
-    # Plot main song (Spotify green)
+    
     ax.plot(angles, values2, color="#1db954", linewidth=2, label=labels[0])
     ax.fill(angles, values2, color="#1db954", alpha=0.4, zorder=2)
 
-    # Title
-    safe_title = escape_latex_chars(title)
-    ax.set_title(safe_title, size=16, pad=15, weight="bold", color="white", va='bottom')
-
-    # Ticks and labels
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(features, size=11, weight='medium', color='white')
     ax.set_yticklabels([])
 
-    # Legend
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=10, labelcolor='white')
 
-    # Remove outer circle and use white grid
     ax.spines['polar'].set_visible(False)
     ax.grid(color='white', linestyle='dashed', linewidth=0.6, alpha=0.4)
 
