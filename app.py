@@ -46,6 +46,8 @@ with st.container():
         print(f"Test 3: User Prompt: {user_prompt}")
 
         if exact_match is not None:
+            print(f"[DEBUG] exact_match type: {type(exact_match)}")
+            print(f"[DEBUG] exact_match contents:\n{exact_match}")
             matched_title = exact_match['Song']
             st.success(f"Found a direct match: {matched_title}. finding similar songs...")
             prompt_for_engine = matched_title
