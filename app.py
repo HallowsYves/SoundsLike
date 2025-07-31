@@ -75,6 +75,8 @@ with st.container():
             main_song = result["main_song"]
             recs = result["similar_songs"]
 
+            recs = [main_song] + recs
+
             # Detected Entities
             st.markdown("### 🧠 Detected Entities")
             st.markdown(f"- {result['song_match_info']}")

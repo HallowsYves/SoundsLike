@@ -236,6 +236,7 @@ def extract_song_artist_from_prompt(prompt):
     match = re.search(r"(?:like\s+)(.+?)\s+by\s+(.+)", prompt, re.IGNORECASE)
     if match:
         return match.group(1).strip(), match.group(2).strip()
+    print("Returning none on extract")
     return None, None
 
 
