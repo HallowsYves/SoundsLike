@@ -19,3 +19,4 @@ data/spotify_dataset.csv
 output/
 
 .env
+secrets.toml
