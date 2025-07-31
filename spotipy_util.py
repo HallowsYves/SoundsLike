@@ -1,3 +1,29 @@
+import spotipy
+import os
+import sys
+
+from spotipy.oauth2 import SpotifyClientCredentials
+
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 
-# Takes in artist name, song name, if possible, then returns URL to display
+client_id = os.getenv("CLIENT_ID")
+client_secret = os.getenv("CLIENT_SECRET")
+
+
+def init_spotify():
+    return spotipy.Spotify(auth_manager=SpotifyClientCredentials(
+        client_id=client_id,
+        client_secret=client_secret
+    ))
+
+
+def get_spotify_track(spotify, artist, song):
+    query = f"{song} {artist}"
+    result = spotify.search(q=query, type="track", limit=1)
+
+    if result and result['tracks']['items']:
+        return result['tracks']['items'][0]
+    return None

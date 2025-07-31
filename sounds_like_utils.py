@@ -245,7 +245,7 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
     Attempts to match song and artist using regex, NER, and fuzzy matching.
     Returns the best-matched row from the song_df or None.
     """
-    # Step 1: Try regex override (handles "songs like X by Y")
+    #  Try regex override 
     structured_song, structured_artist = extract_song_artist_from_prompt(query)
 
     if structured_song and structured_artist:
@@ -253,12 +253,11 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
         song_entity = structured_song
         artist_entity = structured_artist
     else:
-        # Step 2: Fallback to NER
+        # Fallback to NER
         entities = ner_pipeline(query)
         song_entity = clean_bert_output(entities.get("song"))
         artist_entity = clean_bert_output(entities.get("artist"))
 
-    # Step 3: Normalize all text for comparison
     song_entity = normalize(song_entity) if song_entity else ""
     artist_entity = normalize(artist_entity) if artist_entity else ""
     song_df['Song'] = song_df['Song'].str.lower().str.strip()
@@ -271,12 +270,10 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
             artist_entity = known
             break
 
-    # Step 5: If song is substring of artist, ignore it
     if song_entity and artist_entity and song_entity in artist_entity:
         print(f"[Heuristic] Ignoring song '{song_entity}' embedded in artist '{artist_entity}'")
         song_entity = ""
 
-    # Step 6: Fuzzy match within artist-songs if both entities are known
     if song_entity and artist_entity:
         artist_songs = song_df[song_df['Artist(s)'].str.contains(artist_entity, case=False, na=False)]
         if not artist_songs.empty:
@@ -288,7 +285,6 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
             if match and match[1] > 90 and normalize(match[0]) == song_entity:
                 return artist_songs[artist_songs['Song'] == match[0]].iloc[0]
 
-    # Step 7: Global fallback if only song is known or previous fails
     search_query = song_entity if song_entity else query
     best_match = process.extractOne(search_query, song_df['Song'], scorer=fuzz.token_set_ratio)
 
@@ -321,16 +317,16 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
     Returns:
         Nothing, just terminal prints and matplot plots
     """
+    entities = ner_pipeline(user_prompt)
+    mood_entity = entities.get("mood")
+    
     if input_song is not None:
         song_entity = input_song['Song']
         artist_entity = input_song['Artist(s)']
-        mood_entity = None  # we skip NER if we already matched
         print(f"[USING FUZZY MATCH] Song: {song_entity}, Artist: {artist_entity}")
     else:
-        entities = ner_pipeline(user_prompt)
         song_entity = clean_bert_output(entities.get("song"))
         artist_entity = clean_bert_output(entities.get("artist"))
-        mood_entity = entities.get("mood")
 
     # Entity display
     song_match_info = f"Detected Song: **{song_entity if song_entity else 'N/A'}**"
@@ -405,6 +401,7 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
             "radar_chart": radar_path
         })
         
+        print(similar_songs)
         if len(similar_songs) == num_recommendations:
             break
             

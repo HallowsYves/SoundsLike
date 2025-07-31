@@ -6,6 +6,7 @@ from ner.model.pipeline_ner import ner_pipeline
 from data_utils import load_data
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
+from spotipy_util import init_spotify, get_spotify_track
 
 
 # Load models and data once
@@ -21,7 +22,9 @@ def load_model_and_data():
         emotion_labels = json.load(f)
     return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels
 
+
 # App Setup
+spotify = init_spotify()
 st.set_page_config(page_title="SoundsLike", layout="wide")
 st.title("🎵 SoundsLike: Music Recommendation Engine")
 st.caption("Generate music recommendations from natural language prompts like *'sad songs like Moon by Kanye West'*")
@@ -90,13 +93,27 @@ with st.container():
             # Recommended Songs
             st.markdown("---")
             st.markdown("### 🎶 Recommended Songs")
-            for rec in recs:
-                col1, col2 = st.columns([1, 3])
-                #with col1:
-                    #st.image(rec["album_art"], width=100)
-                with col2:
-                    st.markdown(f"**{rec['title']}** by **{rec['artist']}**")
-                    st.markdown(f"**Score**: {rec['score']:.2f}")
-                    st.image(rec["radar_chart"], use_container_width=True)
-        else:
-            st.error("Sorry, could not find any recommendations. Please try another prompt.")
+        for rec in recs:
+            col1, col2 = st.columns([1, 3])
+            with col2:
+                st.markdown(f"**{rec['title']}** by **{rec['artist']}**")
+                st.markdown(f"**Score**: {rec['score']:.2f}")
+                st.image(rec["radar_chart"], use_container_width=True)
+
+                # Get Spotify song data
+                track = get_spotify_track(spotify, rec['title'], rec['artist'])
+                if track:
+                    album_img = track["album"]["images"][0]["url"]
+                    preview_url = track["preview_url"]
+                    external_url = track["external_urls"]["spotify"]
+
+                    # Pill-like preview
+                    col_img, col_info = st.columns([1, 5])
+                    with col_img:
+                        st.image(album_img, width=80)
+                    with col_info:
+                        st.markdown(f"[▶️ {track['name']} – {track['artists'][0]['name']}]({external_url})")
+                        if preview_url:
+                            st.audio(preview_url, format="audio/mp3")
+                else:
+                    st.caption("⚠️ Spotify preview not found.")
