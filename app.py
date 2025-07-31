@@ -110,7 +110,29 @@ with st.container():
                     st.markdown("🎵 (no cover)")
 
             with col_info:
-                st.markdown(f"### [{track_name} – {artist_name}]({external_url})", unsafe_allow_html=True)
+                st.markdown(
+                    """
+                    <style>
+                    .song-link {
+                        color: white !important;
+                        text-decoration: none !important;
+                        transition: color 0.3s;
+                    }
+                    .song-link:hover {
+                        color: #1db954 !important;
+                    }
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+                )
+                st.markdown(
+                    f"""<h3 style='margin-bottom: 0;'>
+                        <a href="{external_url}" target="_blank" class="song-link">
+                        {track_name} – {artist_name}
+                        </a>
+                    </h3>""",
+                    unsafe_allow_html=True
+                )
                 st.markdown(f"**Score:** {rec['score']:.2f}")
 
                 with st.expander("See how your song compares"):
