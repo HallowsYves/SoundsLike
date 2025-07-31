@@ -3,6 +3,7 @@ import os
 import numpy as np
 from slugify import slugify
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
 from sklearn.neighbors import NearestNeighbors
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
@@ -182,6 +183,10 @@ def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "
     Returns:
         str: The full file path to the saved radar chart image.
     """
+
+    def escape_latex_chars(text):
+        return text.replace("_", r"\_")
+
     num_vars = len(features)
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
     angles += angles[:1]
@@ -189,36 +194,42 @@ def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "
     values1 = vector1.tolist() + vector1.tolist()[:1]
     values2 = vector2.tolist() + vector2.tolist()[:1]
 
-    fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
-    fig.patch.set_facecolor("#f9f9f9")
-    ax.set_facecolor("#f0f0f0")
+    fig, ax = plt.subplots(figsize=(4.5, 4.5), subplot_kw=dict(polar=True))
 
-    ax.plot(angles, values1, color="#dda15e", linewidth=2, label=labels[0])
-    ax.fill(angles, values1, color="#dda15e", alpha=0.4, zorder=1)
+    # Dark background setup
+    fig.patch.set_facecolor("#121212")  # Spotify dark
+    ax.set_facecolor("#121212")
 
-    ax.plot(angles, values2, color="#669bbc", linewidth=2, label=labels[1])
-    ax.fill(angles, values2, color="#669bbc", alpha=0.4, zorder=2)
+    # Plot comparison (light gray)
+    ax.plot(angles, values1, color="#CCCCCC", linewidth=1.5, label=labels[1])
+    ax.fill(angles, values1, color="#CCCCCC", alpha=0.25, zorder=1)
 
+    # Plot main song (Spotify green)
+    ax.plot(angles, values2, color="#1db954", linewidth=2, label=labels[0])
+    ax.fill(angles, values2, color="#1db954", alpha=0.4, zorder=2)
+
+    # Title
     safe_title = escape_latex_chars(title)
-    ax.set_title(safe_title, size=15, pad=15, weight="bold", va='bottom')  # Shift title up a bit
+    ax.set_title(safe_title, size=16, pad=15, weight="bold", color="white", va='bottom')
 
+    # Ticks and labels
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(features, size=11, weight='medium')
+    ax.set_xticklabels(features, size=11, weight='medium', color='white')
     ax.set_yticklabels([])
 
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False)  # Legend centered below
+    # Legend
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False, fontsize=10, labelcolor='white')
 
+    # Remove outer circle and use white grid
     ax.spines['polar'].set_visible(False)
-    ax.grid(color='gray', linestyle='dashed', linewidth=0.6, alpha=0.6)
+    ax.grid(color='white', linestyle='dashed', linewidth=0.6, alpha=0.4)
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
     filename = f"radar_{slugify(title)}.png"
     filepath = os.path.join(output_dir, filename)
-
-    # Save using tight bounding box
-    fig.savefig(filepath, dpi=150, bbox_inches='tight')
+    fig.savefig(filepath, dpi=150, bbox_inches='tight', facecolor=fig.get_facecolor())
     plt.close(fig)
 
     return filepath
