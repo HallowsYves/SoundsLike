@@ -7,7 +7,7 @@ from matplotlib import rcParams
 from sklearn.neighbors import NearestNeighbors
 from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
-from fuzzywuzzy import fuzz,process
+from rapidfuzz import fuzz, process
 
 
 def clean_bert_output(text: str) -> str:  
