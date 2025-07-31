@@ -42,8 +42,10 @@ with st.container():
     if st.button("🔍 Find Songs") and user_prompt.strip():
         
         # Attempt Fuzzy Matching
+        print(f"Test 2: User Prompt: {user_prompt}")
         exact_match = find_song_with_fuzzy_matching(user_prompt, df_song_info, ner_pipeline)
         prompt_for_engine = user_prompt
+        print(f"Test 3: User Prompt: {user_prompt}")
 
         if exact_match is not None:
             print(f"[DEBUG] exact_match type: {type(exact_match)}")
@@ -54,8 +56,8 @@ with st.container():
         else:
             st.info("No exact title found. searching by vibe...")
 
-        print(f"User Prompt: {user_prompt}")
-        print(f"Prompt for Engine: {prompt_for_engine}")
+        print(f"Test 4: User Prompt: {user_prompt}")
+        print(f"Test 5: User Prompt/Prompt for engine: {prompt_for_engine}")
         result = find_similar_songs(
             user_prompt=user_prompt,
             input_song=exact_match,

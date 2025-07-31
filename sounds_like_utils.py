@@ -240,7 +240,6 @@ def extract_song_artist_from_prompt(prompt):
     """
     match = re.search(r"(?:like\s+)(.+?)\s+by\s+(.+)", prompt, re.IGNORECASE)
     if match:
-        print(f"Returning {match.group(1).strip()} and {match.group(2).strip()} on extract")
         return match.group(1).strip(), match.group(2).strip()
     print("Returning none on extract")
     return None, None
@@ -276,7 +275,6 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
         entities = ner_pipeline(query)
         song_entity = clean_bert_output(entities.get("song"))
         artist_entity = clean_bert_output(entities.get("artist"))
-        print(f"[NER Extracted] Song:{song_entity} | Artist: {artist_entity}")
 
     song_entity = normalize(song_entity) if song_entity else ""
     artist_entity = normalize(artist_entity) if artist_entity else ""
@@ -303,14 +301,12 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
                 scorer=fuzz.token_sort_ratio
             )
             if match and match[1] > 90 and normalize(match[0]) == song_entity:
-                print(f"Fuzzy Return: artist_songs")
                 return artist_songs[artist_songs['Song'] == match[0]].iloc[0]
 
     search_query = song_entity if song_entity else query
     best_match = process.extractOne(search_query, song_df['Song'], scorer=fuzz.token_set_ratio)
 
     if best_match and best_match[1] >= threshold:
-        print(f"Fuzzy Return: song_df")
         return song_df[song_df['Song'] == best_match[0]].iloc[0]
 
     return None
@@ -355,7 +351,6 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
     else:
         song_entity = clean_bert_output(entities.get("song"))
         artist_entity = clean_bert_output(entities.get("artist"))
-        print(f"[USING NER MATCH] Song: {song_entity}, Artist: {artist_entity}")
 
     # Entity display
     song_match_info = f"Detected Song: **{song_entity if song_entity else 'N/A'}**"
