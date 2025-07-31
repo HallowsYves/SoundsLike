@@ -16,8 +16,8 @@ client_secret = os.getenv("CLIENT_SECRET")
 
 def init_spotify():
     return spotipy.Spotify(auth_manager=SpotifyClientCredentials(
-        client_id=client_id,
-        client_secret=client_secret
+        client_id=st.secrets['spotify']['CLIENT_ID'],
+        client_secret=st.secrets['spotify']['CLIENT_SECRET']
     ))
 
 

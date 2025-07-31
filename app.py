@@ -37,14 +37,17 @@ with st.container():
     st.subheader("💬 Enter Your Prompt")
     user_prompt = st.text_input("What vibe are you going for?", placeholder="e.g. sad songs like Moon by Kanye West")
     num_recs = st.slider("Number of recommendations", min_value=3, max_value=10, value=5)
+    print(f"Test 1: User Prompt: {user_prompt}")
 
     if st.button("🔍 Find Songs") and user_prompt.strip():
         
         # Attempt Fuzzy Matching
-        exact_match, closest_match  = find_song_with_fuzzy_matching(user_prompt, df_song_info, ner_pipeline)
+        print(f"Test 2: User Prompt: {user_prompt}")
+        exact_match = find_song_with_fuzzy_matching(user_prompt, df_song_info, ner_pipeline)
         prompt_for_engine = user_prompt
+        print(f"Test 3: User Prompt: {user_prompt}")
 
-        if exact_match is not None and closest_match is True:
+        if exact_match is not None:
             print(f"[DEBUG] exact_match type: {type(exact_match)}")
             print(f"[DEBUG] exact_match contents:\n{exact_match}")
             matched_title = exact_match['Song']
@@ -53,8 +56,8 @@ with st.container():
         else:
             st.info("No exact title found. searching by vibe...")
 
-        print(f"User Prompt: {user_prompt}")
-        print(f"Prompt for Engine: {prompt_for_engine}")
+        print(f"Test 4: User Prompt: {user_prompt}")
+        print(f"Test 5: User Prompt/Prompt for engine: {prompt_for_engine}")
         result = find_similar_songs(
             user_prompt=user_prompt,
             input_song=exact_match,
