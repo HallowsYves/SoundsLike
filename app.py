@@ -79,41 +79,37 @@ with st.container():
             st.markdown(f"- {result['artist_match_info']}")
             st.markdown(f"- {result['mood_match_info']}")
 
-            # Main Song
-            st.markdown("---")
-            st.markdown("### 🎯 Closest Match")
-            col1, col2 = st.columns([1, 3])
-            #with col1:
-                #st.image(main_song["album_art"], width=140)
-            with col2:
-                st.markdown(f"**{main_song['title']}** by **{main_song['artist']}**")
-                st.markdown(f"**Score**: {main_song['score']:.2f}")
-                st.image(main_song["radar_chart"], caption="Your Input vs Song Features", use_container_width=True)
 
             # Recommended Songs
             st.markdown("---")
             st.markdown("### 🎶 Recommended Songs")
         for rec in recs:
-            col1, col2 = st.columns([1, 3])
-            with col2:
-                st.markdown(f"**{rec['title']}** by **{rec['artist']}**")
-                st.markdown(f"**Score**: {rec['score']:.2f}")
-                st.image(rec["radar_chart"], use_container_width=True)
+            track = get_spotify_track(spotify, rec['title'], rec['artist'])
 
-                # Get Spotify song data
-                track = get_spotify_track(spotify, rec['title'], rec['artist'])
-                if track:
-                    album_img = track["album"]["images"][0]["url"]
-                    preview_url = track["preview_url"]
-                    external_url = track["external_urls"]["spotify"]
+            if track:
+                album_img = track["album"]["images"][0]["url"]
+                external_url = track["external_urls"]["spotify"]
+                track_name = track["name"]
+                artist_name = track["artists"][0]["name"]
+            else:
+                album_img = None
+                external_url = ""
+                track_name = rec["title"]
+                artist_name = rec["artist"]
 
-                    # Pill-like preview
-                    col_img, col_info = st.columns([1, 5])
-                    with col_img:
-                        st.image(album_img, width=80)
-                    with col_info:
-                        st.markdown(f"[▶️ {track['name']} – {track['artists'][0]['name']}]({external_url})")
-                        if preview_url:
-                            st.audio(preview_url, format="audio/mp3")
+            col_art, col_info = st.columns([1, 4])
+
+            with col_art:
+                if album_img:
+                    st.image(album_img, width=200)
                 else:
-                    st.caption("⚠️ Spotify preview not found.")
+                    st.markdown("🎵 (no cover)")
+
+            with col_info:
+                st.markdown(f"### [{track_name} – {artist_name}]({external_url})", unsafe_allow_html=True)
+                st.markdown(f"**Score:** {rec['score']:.2f}")
+
+                with st.expander("See how your song compares"):
+                    st.image(rec["radar_chart"], use_container_width=True)
+
+            st.markdown("---")

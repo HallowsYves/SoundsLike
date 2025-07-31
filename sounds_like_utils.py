@@ -186,15 +186,12 @@ def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "
     angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
     angles += angles[:1]
 
-    fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
-
     values1 = vector1.tolist() + vector1.tolist()[:1]
     values2 = vector2.tolist() + vector2.tolist()[:1]
 
-    fig, ax = plt.subplots(figsize=(6,6), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor("#f9f9f9")
     ax.set_facecolor("#f0f0f0")
-
 
     ax.plot(angles, values1, color="#dda15e", linewidth=2, label=labels[0])
     ax.fill(angles, values1, color="#dda15e", alpha=0.4, zorder=1)
@@ -203,23 +200,25 @@ def create_radar_chart(vector1, vector2, title, features, labels=["Your Song", "
     ax.fill(angles, values2, color="#669bbc", alpha=0.4, zorder=2)
 
     safe_title = escape_latex_chars(title)
-    ax.set_title(safe_title, size=15, pad=30, weight="bold")
-    
-    # Feature labels
+    ax.set_title(safe_title, size=15, pad=15, weight="bold", va='bottom')  # Shift title up a bit
+
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(features, size=11, weight='medium')
     ax.set_yticklabels([])
-    ax.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=2, frameon=False)  # Legend centered below
 
     ax.spines['polar'].set_visible(False)
     ax.grid(color='gray', linestyle='dashed', linewidth=0.6, alpha=0.6)
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+
     filename = f"radar_{slugify(title)}.png"
     filepath = os.path.join(output_dir, filename)
-    plt.tight_layout()
-    fig.savefig(filepath, dpi=150)
+
+    # Save using tight bounding box
+    fig.savefig(filepath, dpi=150, bbox_inches='tight')
     plt.close(fig)
 
     return filepath
@@ -392,7 +391,7 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
         rec_song_data = df_song_info.iloc[idx]
         rec_vector = df_scaled_features.iloc[idx].values
         
-        radar_path = create_radar_chart(input_graph_vector, rec_vector, f"Comparison: {rec_song_data['Song']}", features)
+        radar_path = create_radar_chart(input_graph_vector, rec_vector, f"{rec_song_data['Song']}", features)
         
         similar_songs.append({
             "title": rec_song_data['Song'],

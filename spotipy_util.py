@@ -1,6 +1,7 @@
 import spotipy
 import os
 import sys
+import streamlit as st
 
 from spotipy.oauth2 import SpotifyClientCredentials
 
