@@ -7,20 +7,32 @@ from data_utils import load_data
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
 from spotipy_util import init_spotify, get_spotify_track
+from s3_utils import load_csv_from_s3, load_json_from_s3, load_binary_from_s3
 
 
 # Load models and data once
 @st.cache_resource
 def load_model_and_data():
+    # Load embedder locally (model download from Hugging Face)
     embedder = SentenceTransformer("all-MiniLM-L6-v2")
-    df_scaled_features = load_data("data/scaled_data.csv", index=True)
-    df_song_info = load_data("data/song_data.csv", index=True)
-    song_embed = np.load("data/song_embeddings.npy")
+
+    # Load CSVs from S3
+    df_scaled_features = load_csv_from_s3("scaled_data.csv", index_col=0)
+    df_song_info = load_csv_from_s3("song_data.csv", index_col=0)
+
+    # Load numpy arrays from S3 (binary)
+    song_embed_bytes = load_binary_from_s3("song_embeddings.npy")
+    song_embed = np.load(song_embed_bytes)
     song_embeddings = normalize(song_embed)
-    scaled_emotion_means = np.load("data/emotion_vectors.npy")
-    with open("data/emotion_labels.json", "r") as f:
-        emotion_labels = json.load(f)
-    return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels
+
+    scaled_emotion_bytes = load_binary_from_s3("emotion_vectors.npy")
+    scaled_emotions = np.load(scaled_emotion_bytes)
+
+    # Load JSON from S3
+    emotion_labels = load_json_from_s3("emotion_labels.json")
+
+    return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotions, emotion_labels
+
 
 
 # App Setup
