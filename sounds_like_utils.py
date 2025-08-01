@@ -301,13 +301,17 @@ def find_song_with_fuzzy_matching(query, song_df, ner_pipeline, threshold=85):
                 scorer=fuzz.token_sort_ratio
             )
             if match and match[1] > 90 and normalize(match[0]) == song_entity:
-                return artist_songs[artist_songs['Song'] == match[0]].iloc[0], True
+                matched_rows = artist_songs[artist_songs['Song'] == match[0]]
+                if not matched_rows.empty:
+                    return matched_rows.iloc[0], True 
 
     search_query = song_entity if song_entity else query
     best_match = process.extractOne(search_query, song_df['Song'], scorer=fuzz.token_set_ratio)
 
     if best_match and best_match[1] >= threshold:
-        return song_df[song_df['Song'] == best_match[0]].iloc[0], False
+        matched_rows = song_df[song_df['Song'] == best_match[0]]
+        if not matched_rows.empty:
+            return matched_rows.iloc[0], False
 
     return None, None
 
