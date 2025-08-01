@@ -43,11 +43,12 @@ with st.container():
         
         # Attempt Fuzzy Matching
         print(f"Test 2: User Prompt: {user_prompt}")
-        exact_match = find_song_with_fuzzy_matching(user_prompt, df_song_info, ner_pipeline)
+        (result_tuple, closest_match)  = find_song_with_fuzzy_matching(user_prompt, df_song_info, ner_pipeline)
+        exact_match = result_tuple
         prompt_for_engine = user_prompt
         print(f"Test 3: User Prompt: {user_prompt}")
 
-        if exact_match is not None:
+        if exact_match is not None and closest_match is True:
             print(f"[DEBUG] exact_match type: {type(exact_match)}")
             print(f"[DEBUG] exact_match contents:\n{exact_match}")
             matched_title = exact_match['Song']
