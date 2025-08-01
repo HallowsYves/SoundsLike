@@ -1,39 +1,45 @@
 import boto3
 import os
-import streamlit as st
+import pandas as pd
+import json
+from io import StringIO, BytesIO
+from dotenv import load_dotenv
 
-"""
-We'd use this adter connecting it to our S3 bucket:
+load_dotenv()
 
-from s3_utils import read_csv_from_s3
-df = read_csv_from_s3("data/my_dataset.csv")
-
-Now there's some things to do in the .streamlit/secrets.toml
-"""
 def get_s3_client():
-    if st.secrets.get("aws"):
-        # Running in Streamlit Cloud
-        aws_secrets = st.secrets["aws"]
-    else:
-        # Local .env
-        from dotenv import load_dotenv
-        load_dotenv()
-        aws_secrets = {
-            "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID"),
-            "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY"),
-            "AWS_REGION": os.getenv("AWS_REGION"),
-            "S3_BUCKET_NAME": os.getenv("S3_BUCKET_NAME"),
-        }
-
     return boto3.client(
         "s3",
-        aws_access_key_id=aws_secrets["AWS_ACCESS_KEY_ID"],
-        aws_secret_access_key=aws_secrets["AWS_SECRET_ACCESS_KEY"],
-        region_name=aws_secrets["AWS_REGION"],
-    ), aws_secrets["S3_BUCKET_NAME"]
+        aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        region_name=os.getenv("AWS_REGION"),
+    )
 
-def read_csv_from_s3(key):
-    s3, bucket = get_s3_client()
+def load_csv_from_s3(file_name, index_col=None):
+    s3 = get_s3_client()
+    bucket = os.getenv("S3_BUCKET_NAME")
+    folder = os.getenv("S3_FOLDER")
+    key = f"{folder}{file_name}"
+
     response = s3.get_object(Bucket=bucket, Key=key)
-    import pandas as pd
-    return pd.read_csv(response['Body'])
+    csv_data = response["Body"].read().decode("utf-8")
+    return pd.read_csv(StringIO(csv_data), index_col=index_col)
+
+def load_json_from_s3(file_name):
+    s3 = get_s3_client()
+    bucket = os.getenv("S3_BUCKET_NAME")
+    folder = os.getenv("S3_FOLDER")
+    key = f"{folder}{file_name}"
+
+    response = s3.get_object(Bucket=bucket, Key=key)
+    json_data = response["Body"].read().decode("utf-8")
+    return json.loads(json_data)
+
+def load_binary_from_s3(file_name):
+    s3 = get_s3_client()
+    bucket = os.getenv("S3_BUCKET_NAME")
+    folder = os.getenv("S3_FOLDER")
+    key = f"{folder}{file_name}"
+
+    response = s3.get_object(Bucket=bucket, Key=key)
+    return BytesIO(response["Body"].read())
