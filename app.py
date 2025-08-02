@@ -8,6 +8,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
 from spotipy_util import init_spotify, get_spotify_track
 from s3_utils import load_csv_from_s3, load_json_from_s3, load_binary_from_s3
+import base64
 
 
 # Load models and data once
@@ -33,6 +34,9 @@ def load_model_and_data():
 
     return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotions, emotion_labels
 
+def encode_image_to_base64(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
 
 
 # App Setup
@@ -149,6 +153,7 @@ with st.container():
                 st.markdown(f"**Score:** {rec['score']:.2f}")
 
                 with st.expander("See how your song compares"):
+                    img_base64 = encode_image_to_base64(rec["radar_chart"])
                     st.markdown(
                         f"""
                         <style>
@@ -156,13 +161,12 @@ with st.container():
                             max-height: 400px;
                             width: auto;
                             display: block;
-                            margin-left: auto;
-                            margin-right: auto;
+                            margin: auto;
                         }}
                         </style>
-                        <img class="radar-img" src="data:image/png;base64,{rec['radar_chart']}" />
+                        <img class="radar-img" src="data:image/png;base64,{img_base64}" />
                         """,
-                        unsafe_allow_html=True
+                        unsafe_allow_html=True,
                     )
 
             st.markdown("---")
