@@ -149,6 +149,20 @@ with st.container():
                 st.markdown(f"**Score:** {rec['score']:.2f}")
 
                 with st.expander("See how your song compares"):
-                    st.image(rec["radar_chart"], use_container_width=True)
+                    st.markdown(
+                        f"""
+                        <style>
+                        .radar-img {{
+                            max-height: 400px;
+                            width: auto;
+                            display: block;
+                            margin-left: auto;
+                            margin-right: auto;
+                        }}
+                        </style>
+                        <img class="radar-img" src="data:image/png;base64,{rec['radar_chart'].decode()}" />
+                        """,
+                        unsafe_allow_html=True
+                    )
 
             st.markdown("---")
