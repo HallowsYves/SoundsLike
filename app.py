@@ -160,7 +160,7 @@ with st.container():
                             margin-right: auto;
                         }}
                         </style>
-                        <img class="radar-img" src="data:image/png;base64,{rec['radar_chart'].decode()}" />
+                        <img class="radar-img" src="data:image/png;base64,{rec['radar_chart']}" />
                         """,
                         unsafe_allow_html=True
                     )
