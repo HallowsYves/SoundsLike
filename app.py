@@ -7,20 +7,36 @@ from data_utils import load_data
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
 from spotipy_util import init_spotify, get_spotify_track
+from s3_utils import load_csv_from_s3, load_json_from_s3, load_binary_from_s3
+import base64
 
 
 # Load models and data once
 @st.cache_resource
 def load_model_and_data():
+    # Load embedder locally (model download from Hugging Face)
     embedder = SentenceTransformer("all-MiniLM-L6-v2")
-    df_scaled_features = load_data("data/scaled_data.csv", index=True)
-    df_song_info = load_data("data/song_data.csv", index=True)
-    song_embed = np.load("data/song_embeddings.npy")
+
+    # Load CSVs from S3
+    df_scaled_features = load_csv_from_s3("scaled_data.csv", index_col=0)
+    df_song_info = load_csv_from_s3("song_data.csv", index_col=0)
+
+    # Load numpy arrays from S3 (binary)
+    song_embed_bytes = load_binary_from_s3("song_embeddings.npy")
+    song_embed = np.load(song_embed_bytes)
     song_embeddings = normalize(song_embed)
-    scaled_emotion_means = np.load("data/emotion_vectors.npy")
-    with open("data/emotion_labels.json", "r") as f:
-        emotion_labels = json.load(f)
-    return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotion_means, emotion_labels
+
+    scaled_emotion_bytes = load_binary_from_s3("emotion_vectors.npy")
+    scaled_emotions = np.load(scaled_emotion_bytes)
+
+    # Load JSON from S3
+    emotion_labels = load_json_from_s3("emotion_labels.json")
+
+    return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotions, emotion_labels
+
+def encode_image_to_base64(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
 
 
 # App Setup
@@ -43,11 +59,12 @@ with st.container():
         
         # Attempt Fuzzy Matching
         print(f"Test 2: User Prompt: {user_prompt}")
-        exact_match = find_song_with_fuzzy_matching(user_prompt, df_song_info, ner_pipeline)
+        (result_tuple, closest_match)  = find_song_with_fuzzy_matching(user_prompt, df_song_info, ner_pipeline)
+        exact_match = result_tuple
         prompt_for_engine = user_prompt
         print(f"Test 3: User Prompt: {user_prompt}")
 
-        if exact_match is not None:
+        if exact_match is not None and closest_match is True:
             print(f"[DEBUG] exact_match type: {type(exact_match)}")
             print(f"[DEBUG] exact_match contents:\n{exact_match}")
             matched_title = exact_match['Song']
@@ -136,6 +153,20 @@ with st.container():
                 st.markdown(f"**Score:** {rec['score']:.2f}")
 
                 with st.expander("See how your song compares"):
-                    st.image(rec["radar_chart"], use_container_width=True)
+                    img_base64 = encode_image_to_base64(rec["radar_chart"])
+                    st.markdown(
+                        f"""
+                        <style>
+                        .radar-img {{
+                            max-height: 400px;
+                            width: auto;
+                            display: block;
+                            margin: auto;
+                        }}
+                        </style>
+                        <img class="radar-img" src="data:image/png;base64,{img_base64}" />
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
             st.markdown("---")
