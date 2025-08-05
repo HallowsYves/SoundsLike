@@ -1,7 +1,9 @@
-# SoundsLike - Music Recommendation System <img src="media/3811e3ce1deffc274a2267265811d43b.gif" width="30">
-SoundsLike is a music recommendation system designed to suggest songs based on a user's textual input, including specific song/artist preferences and desired moods
 
+## What is it? / How do I use it? 
+SoundsLike is a music recommendation system designed to suggest songs based on a user's textual input, including specific song/artist preferences and desired moods
 
 
 ## How does it work? 
 * It utilizes Natural Language Processing (NLP) for understanding user queries and Machine Learning (ML) techniques, such as embeddings, K-Nearest Neighbors (KNN), and K-Means clustering, to find and visualize similar songs.
+
+![](media/Figure_1.png)
