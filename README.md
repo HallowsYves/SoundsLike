@@ -8,7 +8,12 @@ Simply enter a prompt, adjust the number of recommendations you want, and get ne
 ![](media/firefox_LaqFOxUuqX.gif)
 
 
-## How does it work? 
-* It utilizes Natural Language Processing (NLP) for understanding user queries and Machine Learning (ML) techniques, such as embeddings, K-Nearest Neighbors (KNN), and K-Means clustering, to find and visualize similar songs.
+## Behind the scenes 
+SoundsLike utilizes Natural Language Processing (NLP) for understanding user queries and Machine Learning (ML) techniques, such as embeddings, K-Nearest Neighbors (KNN), and K-Means clustering, to find and visualize similar songs.
 
-![](media/Figure_1.png)
+* It first uses Natural Language Processing (NLP) with a fine-tuned Named Entity Recognition (NER) model to understand your prompt and identify entities like the song, artist, or mood.
+* The system then creates a temporary vector that numerically represents your input. This is done by finding a vector for the input song and artist (using a SentenceTransformer model) and combining it with a vector for the input mood.
+* It then uses K-Nearest Neighbors (KNN) to find songs in the dataframe that have a vector closest to your input vector.
+* Finally, the system visualizes the results by displaying the qualities of your input song versus the recommended songs in a radar chart and a 2D plot.
+
+![](media/Figure_1.png) 
