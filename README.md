@@ -1,4 +1,4 @@
-# SoundsLike - Music Recommendation System 
+# SoundsLike - Music Recommendation System <img src="media/3811e3ce1deffc274a2267265811d43b.gif" width="30">
 SoundsLike is a music recommendation system designed to suggest songs based on a user's textual input, including specific song/artist preferences and desired moods
 
 
