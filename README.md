@@ -1,6 +1,11 @@
 
 ## What is it? / How do I use it? 
-SoundsLike is a music recommendation system designed to suggest songs based on a user's textual input, including specific song/artist preferences and desired moods
+SoundsLike is a music recommendation system that takes your natural language prompts to suggest songs you might like. It combines a specified song, artist, or mood to find new music with similar characteristics.
+
+Simply enter a prompt, adjust the number of recommendations you want, and get new songs that sound like your input!
+
+**Example**: *"Chill songs like Solar by Inner Wave"* 
+![](media/firefox_LaqFOxUuqX.gif)
 
 
 ## How does it work? 
