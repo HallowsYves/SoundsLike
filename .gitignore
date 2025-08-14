@@ -1,0 +1,23 @@
+.history
+/spotify_dataset.csv
+
+venv/
+
+# *.csv
+# data/
+
+# ner/models/
+ner/model_output/
+
+*.log
+*.pyc
+__pycache__/
+data/clean_data.csv
+data/numeric_data.csv
+data/spotify_dataset.csv
+
+img/
+output/
+
+.env
+secrets.toml
