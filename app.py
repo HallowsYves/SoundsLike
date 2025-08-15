@@ -11,28 +11,38 @@ from s3_utils import load_csv_from_s3, load_json_from_s3, load_binary_from_s3
 import base64
 
 
-# Load models and data once
+from hf_utils import (
+    load_csv_from_hub,
+    load_json_from_hub,
+    load_binary_from_hub,
+)
+
 @st.cache_resource
 def load_model_and_data():
-    # Load embedder locally (model download from Hugging Face)
     embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
-    # Load CSVs from S3
-    df_scaled_features = load_csv_from_s3("scaled_data.csv", index_col=0)
-    df_song_info = load_csv_from_s3("song_data.csv", index_col=0)
+    df_scaled_features = load_csv_from_hub("scaled_data.csv", index_col=0)
+    df_song_info      = load_csv_from_hub("song_data.csv",   index_col=0)
 
-    # Load numpy arrays from S3 (binary)
-    song_embed_bytes = load_binary_from_s3("song_embeddings.npy")
-    song_embed = np.load(song_embed_bytes)
+    song_embed_bytes = load_binary_from_hub("song_embeddings.npy")
+    song_embed = np.load(BytesIO(song_embed_bytes), allow_pickle=False)
     song_embeddings = normalize(song_embed)
 
-    scaled_emotion_bytes = load_binary_from_s3("emotion_vectors.npy")
-    scaled_emotions = np.load(scaled_emotion_bytes)
+    scaled_emotion_bytes = load_binary_from_hub("emotion_vectors.npy")
+    scaled_emotions = np.load(BytesIO(scaled_emotion_bytes), allow_pickle=False)
 
-    # Load JSON from S3
-    emotion_labels = load_json_from_s3("emotion_labels.json")
+    emotion_labels = load_json_from_hub("emotion_labels.json")
 
-    return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotions, emotion_labels
+    return (
+        embedder,
+        df_scaled_features,
+        df_song_info,
+        song_embeddings,
+        scaled_emotions,
+        emotion_labels,
+    )
+
+
 
 def encode_image_to_base64(image_path):
     with open(image_path, "rb") as img_file:
