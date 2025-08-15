@@ -1,13 +1,25 @@
 # hf_utils.py
-import json
-from huggingface_hub import hf_hub_download
+import os, json
 import pandas as pd
 import streamlit as st
+from huggingface_hub import hf_hub_download
 
-HF_DATASET_REPO = "HallowsYves/soundslike-data"
+HF_DATASET_REPO = "HallowsYves/soundslike-data"  
+HF_DATASET_REV  = os.getenv("HF_DATASET_REV", "main") 
+HF_TOKEN        = st.secrets.get("HF_TOKEN", None)      
+
 @st.cache_data(show_spinner=False)
-def _hub_path(filename: str, repo_id: str = HF_DATASET_REPO, repo_type: str = "dataset") -> str:
-    return hf_hub_download(repo_id=repo_id, filename=filename, repo_type=repo_type)
+def _hub_path(filename: str,
+              repo_id: str = HF_DATASET_REPO,
+              repo_type: str = "dataset",
+              revision: str = HF_DATASET_REV):
+    return hf_hub_download(
+        repo_id=repo_id,
+        filename=filename,
+        repo_type=repo_type,
+        revision=revision,
+        token=HF_TOKEN,     
+    )
 
 @st.cache_data(show_spinner=False)
 def load_csv_from_hub(filename: str, **read_csv_kwargs) -> pd.DataFrame:
