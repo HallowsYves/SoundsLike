@@ -7,7 +7,6 @@ from data_utils import load_data
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
 from spotipy_util import init_spotify, get_spotify_track
-from s3_utils import load_csv_from_s3, load_json_from_s3, load_binary_from_s3
 import base64
 
 
