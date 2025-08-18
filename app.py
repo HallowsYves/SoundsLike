@@ -6,6 +6,8 @@ from ner.model.pipeline_ner import ner_pipeline
 from data_utils import load_data
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
+from io import BytesIO
+
 from spotipy_util import init_spotify, get_spotify_track
 import base64
 
