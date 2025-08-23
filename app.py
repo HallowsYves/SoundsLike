@@ -6,7 +6,7 @@ import base64
 
 from sounds_like_utils import find_similar_songs, find_song_with_fuzzy_matching
 from ner_pipeline import ner_pipeline
-from data_utils import load_data
+from data_utils import validate_scaled_data
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
 from spotipy_util import init_spotify, get_spotify_track
@@ -18,6 +18,7 @@ def load_model_and_data():
 
     # Load CSVs from Hugging Face dataset
     df_scaled_features = load_csv_from_hf("scaled_data.csv", index_col=0)
+    validate_scaled_data(df_scaled_features)
     df_song_info = load_csv_from_hf("song_data.csv", index_col=0)
 
     # Load numpy arrays from Hugging Face dataset (binary)

@@ -1,6 +1,52 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
+
+def validate_scaled_data(df, suffix="_T", mean_tol=0.1, std_tol=0.1):
+    """Verify that a dataframe contains standardized features.
+
+    The application expects all feature columns to be produced by
+    :func:`scale_data`, which standardizes values and appends a ``_T`` suffix
+    to each column name.  This helper checks both assumptions and raises a
+    ``ValueError`` if any column appears to be unscaled.
+
+    Args:
+        df (pd.DataFrame): DataFrame to validate.
+        suffix (str, optional): Expected suffix for transformed columns.
+        mean_tol (float, optional): Allowed absolute deviation from zero
+            for column means.
+        std_tol (float, optional): Allowed absolute deviation from one for
+            column standard deviations.
+
+    Raises:
+        ValueError: If any column is missing the suffix or statistics fall
+            outside the tolerated range, indicating unscaled data.
+    """
+
+    # Check that all column names include the expected suffix
+    missing_suffix = [col for col in df.columns if not col.endswith(suffix)]
+    if missing_suffix:
+        raise ValueError(
+            "Detected columns without the expected suffix '{}': {}".format(
+                suffix, missing_suffix
+            )
+        )
+
+    # Verify statistical properties roughly match standardized data
+    means = df.mean()
+    stds = df.std()
+    bad_stats = [
+        col
+        for col in df.columns
+        if abs(means[col]) > mean_tol or abs(stds[col] - 1) > std_tol
+    ]
+    if bad_stats:
+        raise ValueError(
+            "Columns appear unscaled based on mean/std checks: {}".format(
+                bad_stats
+            )
+        )
+
 def load_data(filepath, index=False):
     """Loads any csv files
 
