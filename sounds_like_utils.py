@@ -124,6 +124,23 @@ def run_knn(query_vector, df_scaled_features, k=5):
     distances, indices = knn.kneighbors([query_vector])
     return distances, indices
 
+def distance_to_similarity(distance: float) -> float:
+    """Convert a distance value into a similarity score.
+
+    The ``NearestNeighbors`` model returns Euclidean distances where a lower
+    value indicates higher similarity.  Subtracting these distances from ``1``
+    can yield negative scores because distances are not bounded by ``1``.
+    This helper transforms a distance ``d`` into ``1 / (1 + d)``, producing a
+    value in the ``0``–``1`` range where ``1`` represents an identical match.
+
+    Args:
+        distance (float): The distance value returned from KNN.
+
+    Returns:
+        float: A similarity score between ``0`` and ``1``.
+    """
+    return 1 / (1 + distance)
+
 def plot_pca(query_vector, indices, df_scaled_features):
     """
     Visualises a 2D plot for the query and indicies
@@ -405,7 +422,7 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
     main_song_display = {
         "title": main_song_data['Song'],
         "artist": main_song_data['Artist(s)'],
-        "score": 1.0 if input_song is not None else (1 - distances[0][0]),
+        "score": 1.0 if input_song is not None else distance_to_similarity(distances[0][0]),
         "radar_chart": main_song_radar_path
     }
 
@@ -425,7 +442,7 @@ def find_similar_songs(user_prompt, input_song, num_recommendations, ner_pipelin
         similar_songs.append({
             "title": rec_song_data['Song'],
             "artist": rec_song_data['Artist(s)'],
-            "score": 1 - distances[0][np.where(top_indices == idx)[0][0]],
+            "score": distance_to_similarity(distances[0][np.where(top_indices == idx)[0][0]]),
             "radar_chart": radar_path
         })
         
