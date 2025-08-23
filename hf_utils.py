@@ -1,24 +1,28 @@
-# hf_utils.py
-import json
 from huggingface_hub import hf_hub_download
 import pandas as pd
-import streamlit as st
+import json
+from io import BytesIO
 
-HF_DATASET_REPO = "HallowsYves/soundslike-data"
-@st.cache_data(show_spinner=False)
-def _hub_path(filename: str, repo_id: str = HF_DATASET_REPO, repo_type: str = "dataset") -> str:
-    return hf_hub_download(repo_id=repo_id, filename=filename, repo_type=repo_type)
+REPO_ID = "HallowsYves/soundslike-data"
+REPO_TYPE = "dataset"
 
-@st.cache_data(show_spinner=False)
-def load_csv_from_hub(filename: str, **read_csv_kwargs) -> pd.DataFrame:
-    return pd.read_csv(_hub_path(filename), **read_csv_kwargs)
+def _download(file_name: str) -> str:
+    """Download a file from the Hugging Face dataset repo and return its local path."""
+    return hf_hub_download(repo_id=REPO_ID, filename=file_name, repo_type=REPO_TYPE)
 
-@st.cache_data(show_spinner=False)
-def load_json_from_hub(filename: str):
-    with open(_hub_path(filename), "r", encoding="utf-8") as f:
+def load_csv_from_hf(file_name: str, index_col=None):
+    """Load a CSV file from the Hugging Face dataset."""
+    path = _download(file_name)
+    return pd.read_csv(path, index_col=index_col)
+
+def load_json_from_hf(file_name: str):
+    """Load a JSON file from the Hugging Face dataset."""
+    path = _download(file_name)
+    with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-@st.cache_data(show_spinner=False)
-def load_binary_from_hub(filename: str) -> bytes:
-    with open(_hub_path(filename), "rb") as f:
-        return f.read()
+def load_binary_from_hf(file_name: str):
+    """Load a binary file from the Hugging Face dataset and return a BytesIO buffer."""
+    path = _download(file_name)
+    with open(path, "rb") as f:
+        return BytesIO(f.read())
