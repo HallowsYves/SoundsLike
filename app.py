@@ -2,12 +2,12 @@ import streamlit as st
 import numpy as np
 import json
 from sounds_like_utils import find_similar_songs, find_song_with_fuzzy_matching
-from ner.model.pipeline_ner import ner_pipeline
+from ner_pipeline import ner_pipeline
 from data_utils import load_data
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
 from spotipy_util import init_spotify, get_spotify_track
-from s3_utils import load_csv_from_s3, load_json_from_s3, load_binary_from_s3
+from hf_utils import load_csv_from_hf, load_json_from_hf, load_binary_from_hf
 import base64
 
 
@@ -17,20 +17,20 @@ def load_model_and_data():
     # Load embedder locally (model download from Hugging Face)
     embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
-    # Load CSVs from S3
-    df_scaled_features = load_csv_from_s3("scaled_data.csv", index_col=0)
-    df_song_info = load_csv_from_s3("song_data.csv", index_col=0)
+    # Load CSVs from Hugging Face dataset
+    df_scaled_features = load_csv_from_hf("scaled_data.csv", index_col=0)
+    df_song_info = load_csv_from_hf("song_data.csv", index_col=0)
 
-    # Load numpy arrays from S3 (binary)
-    song_embed_bytes = load_binary_from_s3("song_embeddings.npy")
+    # Load numpy arrays from Hugging Face dataset (binary)
+    song_embed_bytes = load_binary_from_hf("song_embeddings.npy")
     song_embed = np.load(song_embed_bytes)
     song_embeddings = normalize(song_embed)
 
-    scaled_emotion_bytes = load_binary_from_s3("emotion_vectors.npy")
+    scaled_emotion_bytes = load_binary_from_hf("emotion_vectors.npy")
     scaled_emotions = np.load(scaled_emotion_bytes)
 
-    # Load JSON from S3
-    emotion_labels = load_json_from_s3("emotion_labels.json")
+    # Load JSON from Hugging Face dataset
+    emotion_labels = load_json_from_hf("emotion_labels.json")
 
     return embedder, df_scaled_features, df_song_info, song_embeddings, scaled_emotions, emotion_labels
 

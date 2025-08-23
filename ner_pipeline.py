@@ -1,40 +1,28 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification
-import os
-from ner.model.load_model_from_s3 import load_model_from_s3
-"""
-    Goes through the prompt and tokenizes it. Runs it through the trained NER model, and takes out
-    inputs which can be labeled with BIO. It then puts them in their appropriate entity and flushes it.
-"""
+from huggingface_hub import snapshot_download
+
+DEFAULT_REPO = "HallowsYves/soundslike-ner"
+
+def load_model_from_hf(repo_id: str = DEFAULT_REPO) -> str:
+    """Download the NER model from Hugging Face and return the local path."""
+    return snapshot_download(repo_id=repo_id)
+
 # Load model and tokenizer
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # root
-
-# model_path = os.path.join(BASE_DIR, "models", "distilbert-ner")
-model_path = load_model_from_s3()
-
+model_path = load_model_from_hf()
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForTokenClassification.from_pretrained(model_path)
 
 label_list = ["O", "B-MOOD", "B-SONG", "I-SONG", "B-ARTIST", "I-ARTIST"]
 
-def ner_pipeline(text):
-    # Tokenize input text
+def ner_pipeline(text: str):
     inputs = tokenizer(text, return_tensors="pt", truncation=True, is_split_into_words=False)
-
-    # Run inference
     with torch.no_grad():
         outputs = model(**inputs)
-    
     logits = outputs.logits
-    predictions = torch.argmax(logits, dim=-1)[0].tolist()  # batch size 1
-
+    predictions = torch.argmax(logits, dim=-1)[0].tolist()
     tokens = tokenizer.convert_ids_to_tokens(inputs["input_ids"][0])
-
-    # Map tokens to labels
     labels = [label_list[pred] for pred in predictions]
-
-    # Group tokens by entities (simple BIO scheme)
     entities = {"mood": [], "song": [], "artist": []}
     current_entity = None
     current_tokens = []
@@ -59,10 +47,8 @@ def ner_pipeline(text):
         else:
             flush_entity()
 
-    # Flush last entity if exists
     flush_entity()
 
-    # Clean up lists to single strings or None if empty
     for k, v in entities.items():
         entities[k] = " ".join(v) if v else None
 
