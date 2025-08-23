@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import json
 from sounds_like_utils import find_similar_songs, find_song_with_fuzzy_matching
-from ner.model.pipeline_ner import ner_pipeline
+from ner_pipeline import ner_pipeline
 from data_utils import load_data
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
