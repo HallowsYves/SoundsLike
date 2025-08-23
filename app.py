@@ -6,7 +6,7 @@ import base64
 
 from sounds_like_utils import find_similar_songs, find_song_with_fuzzy_matching
 from ner_pipeline import ner_pipeline
-from data_utils import validate_scaled_data
+from data_utils import validate_scaled_data, validate_scaled_array
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
 from spotipy_util import init_spotify, get_spotify_track
@@ -27,8 +27,9 @@ def load_model_and_data():
     song_embed = np.load(BytesIO(song_embed_bytes), allow_pickle=False)
     song_embeddings = normalize(song_embed)
 
-    scaled_emotion_bytes = load_binary_from_hf("emotion_vectors.npy")
+    scaled_emotion_bytes = load_binary_from_hf("scaled_emotion_means.npy")
     scaled_emotion_means = np.load(BytesIO(scaled_emotion_bytes), allow_pickle=False)
+    validate_scaled_array(scaled_emotion_means)
 
     # Load JSON from Hugging Face dataset
     emotion_labels = load_json_from_hf("emotion_labels.json")
