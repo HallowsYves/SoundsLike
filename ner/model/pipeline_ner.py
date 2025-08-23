@@ -1,7 +1,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 import os
-from ner.model.load_model_from_s3 import load_model_from_s3
+from ner.model.load_model_from_hf import load_model_from_hf
 """
     Goes through the prompt and tokenizes it. Runs it through the trained NER model, and takes out
     inputs which can be labeled with BIO. It then puts them in their appropriate entity and flushes it.
@@ -11,7 +11,7 @@ from ner.model.load_model_from_s3 import load_model_from_s3
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # root
 
 # model_path = os.path.join(BASE_DIR, "models", "distilbert-ner")
-model_path = load_model_from_s3()
+model_path = load_model_from_hf()
 
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForTokenClassification.from_pretrained(model_path)
