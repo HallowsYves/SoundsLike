@@ -3,10 +3,11 @@ import numpy as np
 import json
 from io import BytesIO
 import base64
+import logging
 
 from sounds_like_utils import find_similar_songs, find_song_with_fuzzy_matching
 from ner_pipeline import ner_pipeline
-from data_utils import load_data
+from data_utils import validate_scaled_array
 from sentence_transformers import SentenceTransformer
 from sklearn.preprocessing import normalize
 from spotipy_util import init_spotify, get_spotify_track
@@ -18,6 +19,20 @@ def load_model_and_data():
 
     # Load CSVs from Hugging Face dataset
     df_scaled_features = load_csv_from_hf("scaled_data.csv", index_col=0)
+    means = df_scaled_features.mean()
+    stds = df_scaled_features.std()
+    if (np.abs(means) > 0.1).any() or (np.abs(stds - 1) > 0.1).any():
+        logging.warning(
+            "scaled_data.csv appears unstandardized. Regenerate it using scale_data()."
+        )
+        raise ValueError("Scaled feature validation failed")
+    missing_suffix = [col for col in df_scaled_features.columns if not col.endswith("_T")]
+    if missing_suffix:
+        logging.warning(
+            "Columns without '_T' suffix detected: %s. Regenerate scaled_data.csv using scale_data().",
+            missing_suffix,
+        )
+        raise ValueError("Scaled feature suffix validation failed")
     df_song_info = load_csv_from_hf("song_data.csv", index_col=0)
 
     # Load numpy arrays from Hugging Face dataset (binary)
@@ -26,8 +41,9 @@ def load_model_and_data():
     song_embed = np.load(BytesIO(song_embed_bytes), allow_pickle=False)
     song_embeddings = normalize(song_embed)
 
-    scaled_emotion_bytes = load_binary_from_hf("emotion_vectors.npy")
+    scaled_emotion_bytes = load_binary_from_hf("scaled_emotion_means.npy")
     scaled_emotion_means = np.load(BytesIO(scaled_emotion_bytes), allow_pickle=False)
+    validate_scaled_array(scaled_emotion_means)
 
     # Load JSON from Hugging Face dataset
     emotion_labels = load_json_from_hf("emotion_labels.json")
