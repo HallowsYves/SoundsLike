@@ -22,12 +22,16 @@ def load_model_and_data():
     df_song_info = load_csv_from_hf("song_data.csv", index_col=0)
 
     # Load numpy arrays from Hugging Face dataset (binary)
+    # ``load_binary_from_hf`` already returns a ``BytesIO`` object. Passing that
+    # directly to ``np.load`` avoids wrapping it again (which would raise a
+    # ``TypeError``) and keeps the data pointer intact.  Explicitly disallow
+    # pickled data for security.
     song_embed_bytes = load_binary_from_hf("song_embeddings.npy")
-    song_embed = np.load(song_embed_bytes)
+    song_embed = np.load(song_embed_bytes, allow_pickle=False)
     song_embeddings = normalize(song_embed)
 
     scaled_emotion_bytes = load_binary_from_hf("emotion_vectors.npy")
-    scaled_emotions = np.load(scaled_emotion_bytes)
+    scaled_emotions = np.load(scaled_emotion_bytes, allow_pickle=False)
 
     # Load JSON from Hugging Face dataset
     emotion_labels = load_json_from_hf("emotion_labels.json")
